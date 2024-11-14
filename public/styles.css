@@ -49,14 +49,14 @@ header {
 }
 
 /* Login Container */
-.login-container {
+.login-container, .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 90vh;
 }
 
-.login-box {
+.login-box, .register-box {
   position: relative;
   top: auto;
   bottom: auto;

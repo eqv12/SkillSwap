@@ -9,19 +9,20 @@
   <body>
     <header>
       <h1 class="logo">SkillSwap</h1>
-      <a href="register.html" class="register-link">Register</a>
+      <!-- <a href="#" class="register-link">Register</a> -->
     </header>
 
-    <div class="login-container">
-      <div class="login-box">
+    <div class="register-container">
+      <form class="register-box" action="/register" method="POST">
         <img src="resources/bookslogo.png" alt="Books Icon" class="icon" />
         <input type="text" placeholder="username" id="username" name="username" class="input-field" />
+        <input type="text" placeholder="name" id="name" name="name" class="input-field" />
         <input type="password" placeholder="password" id="password" name="password" class="input-field" />
-        <div class="error-box" id="error-box"><span id="error1">Wrong credentials. Please try again</span></div>
-        <button class="login-button" id="submit" type="submit">
+        <!-- <div class="error-box" id="error-box"><span id="error1">Wrong credentials. Please try again</span></div> -->
+        <button class="login-button" id="submit" type="button">
           <span id="arrow"><strong>→</strong></span>
         </button>
-      </div>
+    </form>
     </div>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script> -->
     <script type="module">
@@ -30,27 +31,27 @@
         // alert("you have clicked me");
 
         const username = document.getElementById("username").value;
-        // const name = document.getElementById("name").value;
+        const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
         
-        const response = await fetch("http://localhost:3000/login", {
+        const response = await fetch("http://localhost:3000/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ rollno: username, password: password }),
+          body: JSON.stringify({ rollno: username, name: name, password: password }),
         });
 
         const data = await response.json();
         console.log(data);
-        if (data.status == 200) {
-          // alert("Login successful");
-          document.getElementById("error-box").style.opacity = "0";
-          window.location.href = "./success.html";
-        } else if (data.status == 401) {
-          // alert("Wrong credentials");
-          document.getElementById("error-box").style.opacity = "1";
-        }
+        // if (data.status == 200) {
+        //   // alert("Login successful");
+        //   document.getElementById("error-box").style.opacity = "0";
+        //   window.location.href = "./success.html";
+        // } else if (data.status == 401) {
+        //   // alert("Wrong credentials");
+        //   document.getElementById("error-box").style.opacity = "1";
+        // }
       });
     </script>
   </body>

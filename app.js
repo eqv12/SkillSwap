@@ -4,6 +4,10 @@ import { User } from "./models/User.js";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import path from "path";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 3000;
@@ -24,17 +28,26 @@ app.use(urlencoded({ extended: true }));
 //   res.sendFile(path.join(__dirname, "public", "login.html"));
 // });
 
+app.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+})
+
+app.get("/register", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'))
+})
+
 app.post("/register", async (req, res) => {
   const { rollno, name, password } = req.body;
+  console.log(rollno, name, password);
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
     await newUser.save();
-    res.status(201).send("User registered successfully");
+    res.status(201).json({ message: "User registered successfully", status: 201 });
   } catch (error) {
     console.error("Error registering user: ", error);
-    res.status(500).send("Error registering user");
+    res.status(500).json({ message: "Error registering user", status: 500 });
   }
 });
 
@@ -45,9 +58,9 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ rollno: rollno });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.status(200).json({ message: "Oks then ek dham okay", status: 200 });
+      res.status(200).json({ message: "User credentials authenticated", status: 200 });
     } else {
-      res.status(401).json({ message: "tsk tsk tsk credentials no good ma dawgg", status: 401 });
+      res.status(401).json({ message: "Bad credentials", status: 401 });
     }
   } catch (error) {
     console.error("Error during login: ", error);
