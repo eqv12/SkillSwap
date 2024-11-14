@@ -10,6 +10,13 @@ body {
   background-color: #d3bdf0;
 }
 
+.error-box {
+  color: red;
+  margin: 0px;
+  padding-top: 10px;
+  opacity: 0;
+}
+
 /* Sticky Header */
 header {
   background-color: #2b0038;
@@ -57,7 +64,7 @@ header {
   padding: 40px 30px;
   border-radius: 15px;
   text-align: center;
-  width: 300px;
+  width: 400px;
 }
 
 .icon {
@@ -82,7 +89,7 @@ header {
 
 .login-button {
   position: relative;
-  left: 8%;
+  left: 20%;
   width: 100%;
   max-width: 200px;
   padding: 10px;

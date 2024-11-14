@@ -45,9 +45,9 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ rollno: rollno });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.status(200).json({ message: "Oks then ek dham okay" });
+      res.status(200).json({ message: "Oks then ek dham okay", status: 200 });
     } else {
-      res.status(401).json({ message: "tsk tsk tsk credentials no good ma dawgg" });
+      res.status(401).json({ message: "tsk tsk tsk credentials no good ma dawgg", status: 401 });
     }
   } catch (error) {
     console.error("Error during login: ", error);
