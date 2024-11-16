@@ -1,10 +1,10 @@
 import express, { json, urlencoded } from "express";
 import { connect } from "mongoose";
 import { User } from "./models/User.js";
-import cors from "cors";
+// import cors from "cors";
 import bcrypt from "bcryptjs";
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,21 +20,17 @@ connect(dbURI)
 
 app.use(express.static("public"));
 
-app.use(cors());
+// app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-// app.get("/login", (req, res) => {
-//   res.sendFile(path.join(__dirname, "public", "login.html"));
-// });
-
 app.get("/login", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-})
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
 
 app.get("/register", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'))
-})
+  res.sendFile(path.join(__dirname, "public", "register.html"));
+});
 
 app.post("/register", async (req, res) => {
   const { rollno, name, password } = req.body;
