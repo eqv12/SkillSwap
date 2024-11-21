@@ -5,6 +5,7 @@ import { User } from "./models/User.js";
 import bcrypt from "bcryptjs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Skill } from "./models/Skills.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,6 +62,21 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error during login: ", error);
     res.status(500).send("Error logging in");
+  }
+});
+
+app.post("/addSkill", async (req, res) => {
+  const { skill } = req.body;
+  console.log(req.body);
+  console.log(skill);
+
+  try {
+    const newSubject = new Skill({ skill: skill });
+    await newSubject.save();
+    res.status(201).json({ message: "Subject registered successfully", status: 201 });
+  } catch (error) {
+    console.error("Error registering Subject: ", error);
+    res.status(500).json({ message: "Error registering Subject", status: 500 });
   }
 });
 
