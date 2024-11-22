@@ -6,18 +6,23 @@ import bcrypt from "bcryptjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Skill } from "./models/Skills.js";
+import { Request } from "./models/Request.js";
+import Counter from "./models/Counter.js";
+import connectDB from "./db.js";
+import { getNextSequence } from "./utilities/getNextSequence.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = 3000;
-const dbURI =
-  "mongodb+srv://ramya:Wimmss123.@dev-skill-swap-cluster.efbjn.mongodb.net/skillSwap?retryWrites=true&w=majority&appName=dev-skill-swap-cluster";
+connectDB();
+// const dbURI =
+//   "mongodb+srv://ramya:Wimmss123.@dev-skill-swap-cluster.efbjn.mongodb.net/skillSwap?retryWrites=true&w=majority&appName=dev-skill-swap-cluster";
 
-connect(dbURI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error", err));
+// connect(dbURI)
+//   .then(() => console.log("Connected to MongoDB"))
+//   .catch((err) => console.error("MongoDB connection error", err));
 
 app.use(express.static("public"));
 
@@ -69,14 +74,37 @@ app.post("/addSkill", async (req, res) => {
   const { skill } = req.body;
   console.log(req.body);
   console.log(skill);
+  console.log(req.body.skill);
+  
 
   try {
-    const newSubject = new Skill({ skill: skill });
+    const nextId = await getNextSequence("skills");
+    const newSubject = new Skill({_id:nextId,skill: skill });
     await newSubject.save();
     res.status(201).json({ message: "Subject registered successfully", status: 201 });
   } catch (error) {
     console.error("Error registering Subject: ", error);
+    await Counter.findOneAndUpdate(
+      { id: "skills" },
+      { $inc: { seq: -1 } } // Decrement the counter
+    );
     res.status(500).json({ message: "Error registering Subject", status: 500 });
+
+  }
+});
+
+app.post("/newRequest", async(req, res) => {
+  const {senderId, subjectId, description} = req.body;
+  console.log(req.body);
+  console.log(senderId, subjectId, description)
+
+  try {
+    const newRequest = new Request({senderId: senderId, subjectId: subjectId, description: description})
+    await newRequest.save()
+    res.status(201).json({ message: "Request sent successfully", status: 201 });
+  }catch (error) {
+    console.error("Error creating request ", error);
+    res.status(500).json({ message: "Error creating request", status: 500 });
   }
 });
 
