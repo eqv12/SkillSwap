@@ -8,8 +8,6 @@ import Counter from "./models/Counter.js";
 
 await connectDB();
 
-const test = await User.findOne({ rollno: "24MX121" });
-console.log(test);
 const user = await User.findOne({ rollno: "24MX121" }, { _id: 0, skills: 1 });
 const userSkills = user?.skills;
 console.log(userSkills);
@@ -26,3 +24,17 @@ const final = await Request.find(
   }
 );
 console.log(final);
+
+// const final = await Request.find(
+//   {
+//     senderId: "24MX120",
+//     status: "Pending",
+//   },
+//   {
+//     senderId: 1,
+//     description: 1,
+//     subjectId: 1,
+//     _id: 0,
+//   }
+// );
+// console.log(final);

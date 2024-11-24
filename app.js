@@ -38,6 +38,15 @@ app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
+app.get("/listskills", async (req, res) => {
+  try {
+    const skills = await Skill.find({});
+    res.json(skills);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch skills", status: 500 });
+  }
+});
+
 app.post("/register", async (req, res) => {
   const { rollno, name, password } = req.body;
   console.log(rollno, name, password);
@@ -75,11 +84,10 @@ app.post("/addSkill", async (req, res) => {
   console.log(req.body);
   console.log(skill);
   console.log(req.body.skill);
-  
 
   try {
     const nextId = await getNextSequence("skills");
-    const newSubject = new Skill({_id:nextId,skill: skill });
+    const newSubject = new Skill({ _id: nextId, skill: skill });
     await newSubject.save();
     res.status(201).json({ message: "Subject registered successfully", status: 201 });
   } catch (error) {
@@ -89,20 +97,19 @@ app.post("/addSkill", async (req, res) => {
       { $inc: { seq: -1 } } // Decrement the counter
     );
     res.status(500).json({ message: "Error registering Subject", status: 500 });
-
   }
 });
 
-app.post("/newRequest", async(req, res) => {
-  const {senderId, subjectId, description} = req.body;
+app.post("/newRequest", async (req, res) => {
+  const { senderId, subjectId, description } = req.body;
   console.log(req.body);
-  console.log(senderId, subjectId, description)
+  console.log(senderId, subjectId, description);
 
   try {
-    const newRequest = new Request({senderId: senderId, subjectId: subjectId, description: description})
-    await newRequest.save()
+    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, description: description });
+    await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
-  }catch (error) {
+  } catch (error) {
     console.error("Error creating request ", error);
     res.status(500).json({ message: "Error creating request", status: 500 });
   }

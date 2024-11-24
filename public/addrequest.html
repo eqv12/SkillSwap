@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillSwap - Post Request</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="navbar">
+      <header>
+        <span class="logo">SkillSwap</span>
+        <nav class="navList">
+          <a href="#requests" class="register-link">Requests</a>
+          <a href="#tutoring" class="register-link">Tutoring</a>
+          <a href="#post" class="register-link">Post</a>
+          <a href="#dashboard" class="register-link">Dashboard</a>
+        </nav>
+        <div class="right">
+          <img src="./resources/user.svg" alt="Profile Icon" />
+        </div>
+      </header>
+    </div>
+    <div class="form-container">
+      <h2>Posting Request</h2>
+      <form>
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" placeholder="Enter request title" class="input-field" required />
+        <label for="topic">Topic</label>
+        <div class="add-topic">
+          <select id="topic" name="topic" class="input-field" required>
+            <option value="">Select a topic</option>
+          </select>
+          <!-- <button type="button" class="input-field" id="addsubject">+</button> -->
+        </div>
+
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          class="input-field"
+          placeholder="Enter your description..."
+          required
+        ></textarea>
+
+        <div class="buttons">
+          <button type="reset" class="newreqButton1">Discard</button>
+          <button type="submit" class="newreqButton2">Save</button>
+        </div>
+      </form>
+    </div>
+    <script>
+      window.onload = () => {};
+    </script>
+  </body>
+</html>
