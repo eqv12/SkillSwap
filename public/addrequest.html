@@ -23,9 +23,9 @@
     </div>
     <div class="form-container">
       <h2>Posting Request</h2>
-      <form>
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" placeholder="Enter request title" class="input-field" required />
+      <form id="reqForm">
+        <!-- <label for="title">Title</label>
+        <input type="text" id="title" name="title" placeholder="Enter request title" class="input-field" required /> -->
         <label for="topic">Topic</label>
         <div class="add-topic">
           <select id="topic" name="topic" class="input-field" required>
@@ -42,15 +42,71 @@
           placeholder="Enter your description..."
           required
         ></textarea>
-
+        <div class="error-box" id="error-box">
+          <span id="error1">Request registered successfully</span>
+        </div>
         <div class="buttons">
-          <button type="reset" class="newreqButton1">Discard</button>
-          <button type="submit" class="newreqButton2">Save</button>
+          <button type="reset" class="newreqButton1" id="reset1">Discard</button>
+          <button type="submit" class="newreqButton2" id="submit">Save</button>
         </div>
       </form>
     </div>
     <script>
-      window.onload = () => {};
+      async function listData() {
+        try {
+          const subListJson = await fetch("http://localhost:3000/listSkills");
+          const subListData = await subListJson.json();
+          console.log(subListData);
+          const topicDropdown = document.getElementById("topic");
+          subListData.forEach((skill) => {
+            const option = document.createElement("option");
+            option.value = skill._id;
+            option.textContent = skill.skill;
+            topicDropdown.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      window.onload = listData;
+      const topic = document.getElementById("topic").value;
+      document.getElementById("submit").addEventListener("click", async function (e) {
+        e.preventDefault();
+        // alert("you have clicked me");
+
+        const topic = document.getElementById("topic").value;
+        const description = document.getElementById("description").value;
+        const senderId = "24MX120";
+
+        const response = await fetch("http://localhost:3000/newRequest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ senderId: senderId, subjectId: topic, description: description }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+        if (data.status == 201) {
+          // alert("Login successful");
+          document.getElementById("error1").textContent = "Request Registered successfully";
+          document.getElementById("error1").style.color = "green";
+          document.getElementById("error-box").style.opacity = "1";
+          const form = document.getElementById("reqForm");
+          form.reset();
+          // window.location.href = "./success.html";
+        } else if (data.status == 500) {
+          //alert("Wrong credentials");
+          document.getElementById("error1").style.color = "red";
+          document.getElementById("error1").textContent =
+            "We werent able to register your request. Please try again after some time";
+          document.getElementById("error-box").style.opacity = "1";
+        }
+      });
+      document.getElementById("reset1").addEventListener("click", async function (e) {
+        document.getElementById("error-box").style.opacity = "0";
+      });
     </script>
   </body>
 </html>

@@ -38,7 +38,11 @@ app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-app.get("/listskills", async (req, res) => {
+app.get("/newRequest", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "addrequest.html"));
+});
+
+app.get("/listSkills", async (req, res) => {
   try {
     const skills = await Skill.find({});
     res.json(skills);
