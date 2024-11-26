@@ -42,7 +42,7 @@ const generateToken = (rollno) => {
 const authenticate = (req, res, next) => {
   const token = req.cookies.authToken;
   if (!token) {
-    return res.status(401).json({ message: "Token not found. Authentication failed. Sign in again" });
+    return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
   }
 
   try {
@@ -52,7 +52,7 @@ const authenticate = (req, res, next) => {
     console.log(req.user);
     next();
   } catch (err) {
-    res.status(403).json({ message: "Invalid or expired token. Please sign in again" });
+    return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
   }
 };
 
@@ -115,6 +115,20 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/logout", (req, res) => {
+  try {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error clearing cookie:", error);
+    res.status(500).send({ error: "Failed to logout" });
+  }
+});
+
 app.post("/addSkill", async (req, res) => {
   const { skill } = req.body;
   console.log(req.body);
@@ -161,66 +175,65 @@ app.get("/outgoingRequests", authenticate, async (req, res) => {
           from: "requests",
           localField: "rollno",
           foreignField: "senderId",
-          as: "req"
-        }
+          as: "req",
+        },
       },
       {
         $unwind: {
-          path: "$req"
-        }
+          path: "$req",
+        },
       },
       {
         $match: {
-          rollno: requesterId
-        }
+          rollno: requesterId,
+        },
       },
       {
         $addFields: {
           subjId: "$req.subjectId",
-          descr: "$req.description"
-         
-        }
+          descr: "$req.description",
+        },
       },
       {
         $lookup: {
           from: "skills",
           localField: "subjId",
           foreignField: "_id",
-          as: "sk"
-        }
+          as: "sk",
+        },
       },
       {
         $addFields: {
-          subjName: {$arrayElemAt: ["$sk", 0]}
-        }
+          subjName: { $arrayElemAt: ["$sk", 0] },
+        },
       },
       {
         $addFields: {
-          subjName: "$subjName.skill"
-        }
+          subjName: "$subjName.skill",
+        },
       },
       {
-        $unset: ["req", "sk", "password", "_id", "__v", "subjId", "phone", "skills"]
-      }
+        $unset: ["req", "sk", "password", "_id", "__v", "subjId", "phone", "skills"],
+      },
     ]);
-    res.json(myReqs); 
+    res.json(myReqs);
     // res.render('outgoingRequests', { requests: myReqs });
-    console.log(myReqs)
+    console.log(myReqs);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
   }
-})
+});
 
 app.get("/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
   try {
     const myReqs = await User.aggregate();
     res.json(myReqs);
-    console.log(myReqs)
+    console.log(myReqs);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
   }
-})
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
