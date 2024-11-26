@@ -3,6 +3,8 @@ import { connect } from "mongoose";
 import { User } from "./models/User.js";
 // import cors from "cors";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Skill } from "./models/Skills.js";
@@ -25,10 +27,34 @@ connectDB();
 //   .catch((err) => console.error("MongoDB connection error", err));
 
 app.use(express.static("public"));
+app.use(cookieParser());
 
 // app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
+
+//these are the middlewares.
+const generateToken = (rollno) => {
+  return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn: "15m" });
+};
+
+//token authentication middle where this is
+const authenticate = (req, res, next) => {
+  const token = req.cookies.authToken;
+  if (!token) {
+    return res.status(401).json({ message: "Token not found. Authentication failed. Sign in again" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    req.user = decoded;
+    console.log("this is from authenticate req.user");
+    console.log(req.user);
+    next();
+  } catch (err) {
+    res.status(403).json({ message: "Invalid or expired token. Please sign in again" });
+  }
+};
 
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
@@ -38,7 +64,7 @@ app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-app.get("/newRequest", (req, res) => {
+app.get("/newRequest", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "addrequest.html"));
 });
 
@@ -73,6 +99,12 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ rollno: rollno });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+      const token = generateToken(rollno);
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+      });
       res.status(200).json({ message: "User credentials authenticated", status: 200 });
     } else {
       res.status(401).json({ message: "Bad credentials", status: 401 });
@@ -104,8 +136,9 @@ app.post("/addSkill", async (req, res) => {
   }
 });
 
-app.post("/newRequest", async (req, res) => {
-  const { senderId, subjectId, description } = req.body;
+app.post("/newRequest", authenticate, async (req, res) => {
+  const { subjectId, description } = req.body;
+  const senderId = req.user.rollno;
   console.log(req.body);
   console.log(senderId, subjectId, description);
 

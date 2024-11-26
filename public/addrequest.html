@@ -76,14 +76,14 @@
 
         const topic = document.getElementById("topic").value;
         const description = document.getElementById("description").value;
-        const senderId = "24MX120";
+        // const senderId = "24MX120";
 
         const response = await fetch("http://localhost:3000/newRequest", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ senderId: senderId, subjectId: topic, description: description }),
+          body: JSON.stringify({ subjectId: topic, description: description }),
         });
 
         const data = await response.json();
