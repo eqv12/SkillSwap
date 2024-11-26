@@ -46,18 +46,26 @@ header {
   margin: 20px auto;
 }
 
+.request-container {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 15px;
+  width: 40%;
+  margin: 20px auto;
+}
+
 .form-container h2 {
   font-size: 24px;
   margin-bottom: 15px;
 }
 
-.input-field {
+.input-field, .individual-request-container {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
   border: none;
   border-radius: 20px;
-  background-color: #f5f5f5;
+  background-color: #e6e3e7;
   font-size: 16px;
   color: #888;
 }

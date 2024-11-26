@@ -152,7 +152,11 @@ app.post("/newRequest", authenticate, async (req, res) => {
   }
 });
 
-app.get("/outgoingRequests", authenticate, async (req, res) => {
+app.get("/outgoingRequests", authenticate, (req, res) => {
+  res.sendFile(__dirname + "/public/outgoingRequests.html");
+});
+
+app.get("/api/outgoingRequests", authenticate, async (req, res) => {
   const requesterId = req.user.rollno;
   try {
     const myReqs = await User.aggregate([
@@ -177,8 +181,8 @@ app.get("/outgoingRequests", authenticate, async (req, res) => {
       {
         $addFields: {
           subjId: "$req.subjectId",
-          descr: "$req.description"
-         
+          descr: "$req.description",
+          status: "$req.status"
         }
       },
       {

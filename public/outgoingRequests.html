@@ -24,22 +24,30 @@
 
   <!-- Section for displaying requests -->
   <div class="requests-container">
-    <h2>Outgoing Requests</h2>
     <div id="requests-list">
       <!-- Requests will be injected here -->
     </div>
+  </div>
+
+  <div id="reqs-list" class="request-container">
+    <h2>Outgoing Requests</h2>
+    <!-- <div id="req" class="individual-request-container">
+        <label id="topicLabel">Topic: </label><br>
+        <label id="descrLabel">Description: </label><br>
+        <label id="statusLabel">Status: </label>
+    </div> -->
   </div>
 
   <script>
     // Fetch the list of outgoing requests from the server
     async function fetchOutgoingRequests() {
       try {
-        const response = await fetch("http://localhost:3000/outgoingRequests");
+        const response = await fetch("http://localhost:3000/api/outgoingRequests");
         const requestsData = await response.json();
         console.log(requestsData);
 
         // Get the container where requests will be displayed
-        const requestsList = document.getElementById("requests-list");
+        const requestsList = document.getElementById("reqs-list");
 
         // Check if there are requests
         if (requestsData.length === 0) {
@@ -47,20 +55,18 @@
         } else {
           // Loop through each request and create HTML elements
           requestsData.forEach(request => {
-            const requestItem = document.createElement("div");
-            requestItem.classList.add("request-item");
+            // document.getElementById("topicLabel").innerHTML += request.subjName
+            const reqDiv = document.createElement("div");
+            reqDiv.classList.add("individual-request-container");
 
-            // Create the content of each request item
-            const requestContent = `
-              <h3>${request.subjName}</h3>
-              <p><strong>Description:</strong> ${request.descr}</p>
-            `;
-
-            // Add the content to the request item
-            requestItem.innerHTML = requestContent;
+            reqDiv.innerHTML = `<label><strong>Topic:</strong> ${request.subjName}</label><br>
+            <label><strong>Description:</strong> ${request.descr}</label><br>
+            <label><strong>Status:</strong> ${request.status}</label><br>
+             <label><strong>Accepted By:</strong>  &lt;to be filled&gt;</label> `;
+            
 
             // Append to the list
-            requestsList.appendChild(requestItem);
+            requestsList.appendChild(reqDiv);
           });
         }
       } catch (error) {
