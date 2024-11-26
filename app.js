@@ -38,7 +38,7 @@ const generateToken = (rollno) => {
   return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn: "15m" });
 };
 
-//token authentication middle where this is
+//token authentication middleware
 const authenticate = (req, res, next) => {
   const token = req.cookies.authToken;
   if (!token) {
@@ -151,6 +151,76 @@ app.post("/newRequest", authenticate, async (req, res) => {
     res.status(500).json({ message: "Error creating request", status: 500 });
   }
 });
+
+app.get("/outgoingRequests", authenticate, async (req, res) => {
+  const requesterId = req.user.rollno;
+  try {
+    const myReqs = await User.aggregate([
+      {
+        $lookup: {
+          from: "requests",
+          localField: "rollno",
+          foreignField: "senderId",
+          as: "req"
+        }
+      },
+      {
+        $unwind: {
+          path: "$req"
+        }
+      },
+      {
+        $match: {
+          rollno: requesterId
+        }
+      },
+      {
+        $addFields: {
+          subjId: "$req.subjectId",
+          descr: "$req.description"
+         
+        }
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "subjId",
+          foreignField: "_id",
+          as: "sk"
+        }
+      },
+      {
+        $addFields: {
+          subjName: {$arrayElemAt: ["$sk", 0]}
+        }
+      },
+      {
+        $addFields: {
+          subjName: "$subjName.skill"
+        }
+      },
+      {
+        $unset: ["req", "sk", "password", "_id", "__v", "subjId", "phone", "skills"]
+      }
+    ]);
+    res.json(myReqs); 
+    // res.render('outgoingRequests', { requests: myReqs });
+    console.log(myReqs)
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+  }
+})
+
+app.get("/incomingRequests", authenticate, async (req, res) => {
+  const receiverId = req.user.rollno;
+  try {
+    const myReqs = await User.aggregate();
+    res.json(myReqs);
+    console.log(myReqs)
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+  }
+})
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

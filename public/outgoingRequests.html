@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillSwap - Outgoing Requests</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="navbar">
+    <header>
+      <span class="logo">SkillSwap</span>
+      <nav class="navList">
+        <a href="#requests" class="register-link">Requests</a>
+        <a href="#tutoring" class="register-link">Tutoring</a>
+        <a href="#post" class="register-link">Post</a>
+        <a href="#dashboard" class="register-link">Dashboard</a>
+      </nav>
+      <div class="right">
+        <img src="./resources/user.svg" alt="Profile Icon" />
+      </div>
+    </header>
+  </div>
+
+  <!-- Section for displaying requests -->
+  <div class="requests-container">
+    <h2>Outgoing Requests</h2>
+    <div id="requests-list">
+      <!-- Requests will be injected here -->
+    </div>
+  </div>
+
+  <script>
+    // Fetch the list of outgoing requests from the server
+    async function fetchOutgoingRequests() {
+      try {
+        const response = await fetch("http://localhost:3000/outgoingRequests");
+        const requestsData = await response.json();
+        console.log(requestsData);
+
+        // Get the container where requests will be displayed
+        const requestsList = document.getElementById("requests-list");
+
+        // Check if there are requests
+        if (requestsData.length === 0) {
+          requestsList.innerHTML = "<p>No outgoing requests available.</p>";
+        } else {
+          // Loop through each request and create HTML elements
+          requestsData.forEach(request => {
+            const requestItem = document.createElement("div");
+            requestItem.classList.add("request-item");
+
+            // Create the content of each request item
+            const requestContent = `
+              <h3>${request.subjName}</h3>
+              <p><strong>Description:</strong> ${request.descr}</p>
+            `;
+
+            // Add the content to the request item
+            requestItem.innerHTML = requestContent;
+
+            // Append to the list
+            requestsList.appendChild(requestItem);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching requests:", error);
+        const requestsList = document.getElementById("requests-list");
+        requestsList.innerHTML = "<p>Failed to load requests. Please try again later.</p>";
+      }
+    }
+
+    // Run the function when the page loads
+    window.onload = fetchOutgoingRequests;
+  </script>
+</body>
+</html>
