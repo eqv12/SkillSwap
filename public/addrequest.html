@@ -16,7 +16,7 @@
           <a href="#post" class="register-link">Post</a>
           <a href="#dashboard" class="register-link">Dashboard</a>
         </nav>
-        <div class="right">
+        <div class="right" onclick="logout()">
           <img src="./resources/user.svg" alt="Profile Icon" />
         </div>
       </header>
@@ -104,6 +104,22 @@
           document.getElementById("error-box").style.opacity = "1";
         }
       });
+      async function logout() {
+        try {
+          const response = await fetch("/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+          console.log(response);
+          if (response.status === 200) {
+            window.location.href = "http://localhost:3000/login";
+          } else {
+            console.error("Logout failed:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Error during logout:", error);
+        }
+      }
       document.getElementById("reset1").addEventListener("click", async function (e) {
         document.getElementById("error-box").style.opacity = "0";
       });

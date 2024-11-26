@@ -146,7 +146,7 @@ button[type="submit"] {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  height: 85vh;
 }
 
 .login-box,
@@ -232,7 +232,9 @@ button[type="submit"] {
   justify-content: center;
   align-items: center;
 }
-
+.right:hover {
+  cursor: pointer;
+}
 .right img {
   width: 30px;
   height: 30px;
@@ -241,4 +243,16 @@ button[type="submit"] {
 textarea {
   height: 25vh;
   resize: none;
+}
+#sessionlog {
+  position: relative;
+  top: 20px;
+  left: 30%;
+  text-align: center;
+  padding: 5px;
+  background-color: #9a71b6fb;
+  width: 40%;
+  border-radius: 10px;
+  font-size: larger;
+  opacity: 0;
 }

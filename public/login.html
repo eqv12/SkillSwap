@@ -7,11 +7,25 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <h1 class="logo">SkillSwap</h1>
-      <a href="register.html" class="register-link">Register</a>
-    </header>
-
+    <!-- <div class="navbar">
+      <header>
+        <nav class="navList">
+          <h1 class="logo">SkillSwap</h1>
+          <a href="register.html" class="register-link">Register</a>
+        </nav>
+      </header>
+    </div> -->
+    <div class="navbar">
+      <header>
+        <span class="logo">SkillSwap</span>
+        <nav class="navList">
+          <a href="http://localhost:3000/register" class="register-link">Register</a>
+        </nav>
+      </header>
+    </div>
+    <div id="sessionlog">
+      <p id="sessionlogout"></p>
+    </div>
     <div class="login-container">
       <div class="login-box">
         <img src="resources/bookslogo.png" alt="Books Icon" class="icon" />
@@ -32,7 +46,7 @@
         const username = document.getElementById("username").value;
         // const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
-        
+
         const response = await fetch("http://localhost:3000/login", {
           method: "POST",
           headers: {
@@ -52,6 +66,18 @@
           document.getElementById("error-box").style.opacity = "1";
         }
       });
+      const urlParams = new URLSearchParams(window.location.search);
+      const message = urlParams.get("message");
+      if (message) {
+        const messageDiv = document.getElementById("sessionlog");
+        const messagePara = document.getElementById("sessionlogout");
+        messagePara.textContent = decodeURIComponent(message);
+        messageDiv.style.opacity = "1";
+        messagePara.style.opacity = "1";
+        setTimeout(() => {
+          messageDiv.style.opacity = "0";
+        }, 4000);
+      }
     </script>
   </body>
 </html>
