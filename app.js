@@ -56,8 +56,20 @@ const authenticate = (req, res, next) => {
   }
 };
 
+app.get("/", (req, res) => {
+  res.redirect("/login");
+});
+
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+app.get("/dashboard", authenticate, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+app.get("/incomingRequests", authenticate, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "tutoringRequests.html"));
 });
 
 app.get("/register", (req, res) => {
@@ -105,6 +117,7 @@ app.post("/login", async (req, res) => {
         secure: true,
         sameSite: "Strict",
       });
+
       res.status(200).json({ message: "User credentials authenticated", status: 200 });
     } else {
       res.status(401).json({ message: "Bad credentials", status: 401 });
@@ -196,8 +209,8 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
         $addFields: {
           subjId: "$req.subjectId",
           descr: "$req.description",
-          status: "$req.status"
-        }
+          status: "$req.status",
+        },
       },
       {
         $lookup: {

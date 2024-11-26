@@ -18,7 +18,7 @@
         <input type="text" placeholder="username" id="username" name="username" class="input-field" />
         <input type="text" placeholder="name" id="name" name="name" class="input-field" />
         <input type="password" placeholder="password" id="password" name="password" class="input-field" />
-        <input type="password" placeholder= "confirm password" id="re_password" name="re_password" class="input-field" />
+        <input type="password" placeholder="confirm password" id="re_password" name="re_password" class="input-field" />
         <p id="pass_valid"></p>
         <div class="error-box" id="error-box"><span id="error1">User Not registered</span></div>
         <button class="login-button" id="submit" type="button">
@@ -28,44 +28,44 @@
     </div>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script> -->
     <script type="module">
-      function passwordChecking(password){
-        const pass_valid=document.getElementById("pass_valid");
-        pass_valid.textContent="";
-        const minlength=password.length>=8;
+      function passwordChecking(password) {
+        const pass_valid = document.getElementById("pass_valid");
+        pass_valid.textContent = "";
+        const minlength = password.length >= 8;
         const uppercase = /[A-Z]/.test(password);
         const lowercase = /[a-z]/.test(password);
         const digit = /[0-9]/.test(password);
         const specialchar = /[!@#$%^&*(),.?;:|<>]/.test(password);
-        if(!minlength){
-          pass_valid.textContent="Password must be atleast 8 characters.";
-          pass_valid.style.color="red";
+        if (!minlength) {
+          pass_valid.textContent = "Password must be atleast 8 characters.";
+          pass_valid.style.color = "red";
           return;
         }
-        if(!uppercase){
-          pass_valid.textContent="Password must be atleast one uppercase.";
-          pass_valid.style.color="red";
+        if (!uppercase) {
+          pass_valid.textContent = "Password must be atleast one uppercase.";
+          pass_valid.style.color = "red";
           return;
         }
-        if(!lowercase){
-          pass_valid.textContent="Password must be atleast one lowercase.";
-          pass_valid.style.color="red";
+        if (!lowercase) {
+          pass_valid.textContent = "Password must be atleast one lowercase.";
+          pass_valid.style.color = "red";
           return;
         }
-        if(!specialchar){
-          pass_valid.textContent="Password must be atleast one special character.";
-          pass_valid.style.color="red";
+        if (!specialchar) {
+          pass_valid.textContent = "Password must be atleast one special character.";
+          pass_valid.style.color = "red";
           return;
         }
-        if(!digit){
-          pass_valid.textContent="Password must be atleast one digit.";
-          pass_valid.style.color="red";
+        if (!digit) {
+          pass_valid.textContent = "Password must be atleast one digit.";
+          pass_valid.style.color = "red";
           return;
         }
-        pass_valid.textContent="Password is Strong."
-        pass_valid.style.color="green";
+        pass_valid.textContent = "Password is Strong.";
+        pass_valid.style.color = "green";
       }
-      document.getElementById("password").addEventListener("input",function(){
-        const password=document.getElementById("password").value;
+      document.getElementById("password").addEventListener("input", function () {
+        const password = document.getElementById("password").value;
         passwordChecking(password);
       });
       document.getElementById("submit").addEventListener("click", async function (e) {
@@ -75,23 +75,22 @@
         const username = document.getElementById("username").value;
         const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
-        const re_password=document.getElementById("re_password").value;
+        const re_password = document.getElementById("re_password").value;
 
         passwordChecking(password);
 
         if (password !== re_password) {
-          pass_valid.textContent="Passwords do not match!";
-          pass_valid.style.color="red";
+          pass_valid.textContent = "Passwords do not match!";
+          pass_valid.style.color = "red";
           return; // Stop further execution if passwords don't match
         }
 
-        
         const response = await fetch("http://localhost:3000/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ rollno: username, name: name, password: password}),
+          body: JSON.stringify({ rollno: username, name: name, password: password }),
         });
 
         const data = await response.json();
@@ -99,7 +98,7 @@
         if (data.status == 201) {
           // alert("Login successful");
           document.getElementById("error-box").style.opacity = "0";
-          window.location.href = "./success.html";
+          window.location.href = "http://localhost:3000/login";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
           document.getElementById("error-box").style.opacity = "1";
