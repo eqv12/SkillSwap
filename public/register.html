@@ -95,14 +95,32 @@
 
         const data = await response.json();
         console.log(data);
-        if (data.status == 201) {
-          // alert("Login successful");
+        // if (data.status == 200) {
+        //   // alert("Login successful");
+        //   document.getElementById("error-box").style.opacity = "0";
+        //   window.location.href = "http://localhost:3000/login";
+        // } else if (data.status == 500) {
+        //   //alert("Wrong credentials");
+        //   document.getElementById("error-box").style.opacity = "1";
+        // }
+
+        if (data.status == 200) {
+          // Set a flag indicating email verification is needed
+          localStorage.setItem('registrationStatus', 'pending');
           document.getElementById("error-box").style.opacity = "0";
-          window.location.href = "http://localhost:3000/login";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
           document.getElementById("error-box").style.opacity = "1";
         }
+
+        document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            if (localStorage.getItem('registrationStatus') === 'verified') {
+                window.location.href = "http://localhost:3000/login";
+            }
+        }
+      });
+      
       });
     </script>
   </body>

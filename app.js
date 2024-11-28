@@ -12,6 +12,19 @@ import { Request } from "./models/Request.js";
 import Counter from "./models/Counter.js";
 import connectDB from "./db.js";
 import { getNextSequence } from "./utilities/getNextSequence.js";
+import nodemailer from 'nodemailer';
+// import { sendEmail } from './mailer.js';
+import crypto from 'crypto';
+
+const pendingUsers = {}; 
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'anony3938@gmail.com', 
+    pass: 'bbyi yuej ceni huaa', 
+  },
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,7 +62,7 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
     req.user = decoded;
     console.log("this is from authenticate req.user");
-    console.log(req.user);
+    console.log(req.user);  
     next();
   } catch (err) {
     return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
@@ -93,16 +106,69 @@ app.post("/register", async (req, res) => {
   const { rollno, name, password } = req.body;
   console.log(rollno, name, password);
 
+  // let email = `${rollno}@psgtech.ac.in`;
+  let email = 'ramyaraja1206@gmail.com';
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const token = crypto.randomBytes(16).toString('hex');
+  pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() }
+
+  const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+
+  console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
+
+  res.status(200).json({ message: "Check your email to verify your account." });
+
+  // try {
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+  //   const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
+  //   await newUser.save();
+  //   res.status(201).json({ message: "User registered successfully", status: 201 });
+  // } catch (error) {
+  //   console.error("Error registering user: ", error);
+  //   res.status(500).json({ message: "Error registering user", status: 500 });
+  // }
+});
+
+app.get('/verify-email', async (req, res) => {
+  const { token } = req.query; // Extract token from the URL query
+
+  const userData = pendingUsers[token];
+  if (!userData) {
+    return res.status(400).json({ message: 'Invalid or expired token.' });
+  }
+
+  const tokenExpiration = 60 * 60 * 1000; // 1 hour in milliseconds
+  if (Date.now() - userData.createdAt > tokenExpiration) {
+    delete pendingUsers[token]; // Cleanup expired data
+    return res.status(400).json({ message: 'Token has expired.' });
+  }
+
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
+    const newUser = new User({
+      rollno: userData.rollno, 
+      name: userData.name,
+      password: userData.hashedPassword,
+    });
+    console.log(newUser);
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully", status: 201 });
+
+    // Remove user from pendingUsers
+    delete pendingUsers[token];
+
+    // res.status(200).json({ message: 'Email verified successfully! Your account is now active.' });
+    res.send(`
+      <script>
+        localStorage.setItem('registrationStatus', 'verified');
+        window.close();
+      </script>
+    `);
   } catch (error) {
-    console.error("Error registering user: ", error);
-    res.status(500).json({ message: "Error registering user", status: 500 });
+    console.error('Error saving user:', error);
+    res.status(500).json({ message: 'Error verifying email.' });
   }
 });
+
 
 app.post("/login", async (req, res) => {
   console.log(req.body);
