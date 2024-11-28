@@ -34,8 +34,8 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 //these are the middlewares.
-const generateToken = (rollno) => {
-  return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn: "15m" });
+const generateToken = (rollno,expiresIn="15m") => {
+  return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn });
 };
 
 //token authentication middleware
@@ -106,16 +106,18 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   console.log(req.body);
-  const { rollno, password } = req.body;
+  const { rollno, password,remember_me } = req.body;
   try {
     const user = await User.findOne({ rollno: rollno });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const token = generateToken(rollno);
+      const tokenExpiry = remember_me ? "7d":"15m";
+      const token = generateToken(rollno,tokenExpiry);
       res.cookie("authToken", token, {
         httpOnly: true,
         secure: true,
         sameSite: "Strict",
+        maxAge: remember_me ? 7*24*60*60*1000:null,
       });
 
       res.status(200).json({ message: "User credentials authenticated", status: 200 });
