@@ -15,7 +15,7 @@ import { getNextSequence } from "./utilities/getNextSequence.js";
 import nodemailer from 'nodemailer';
 // import { sendEmail } from './mailer.js';
 import crypto from 'crypto';
-
+  
 const pendingUsers = {}; 
 
 const transporter = nodemailer.createTransport({
