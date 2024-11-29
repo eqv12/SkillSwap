@@ -33,7 +33,7 @@
           </select>
           <!-- <button type="button" class="input-field" id="addsubject">+</button> -->
         </div>
-
+        <div><label for="title">Enter your Title: </label><input type="text" id="title" name="title" class="input-field" required></div>
         <label for="description">Description</label>
         <textarea
           id="description"
@@ -76,6 +76,7 @@
 
         const topic = document.getElementById("topic").value;
         const description = document.getElementById("description").value;
+        const title=document.getElementById("title").value;
         // const senderId = "24MX120";
 
         const response = await fetch("http://localhost:3000/newRequest", {
@@ -83,7 +84,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ subjectId: topic, description: description }),
+          body: JSON.stringify({ subjectId: topic, title:title ,description: description }),
         });
 
         const data = await response.json();
