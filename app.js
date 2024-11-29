@@ -232,13 +232,13 @@ app.post("/addSkill", async (req, res) => {
 });
 
 app.post("/newRequest", authenticate, async (req, res) => {
-  const { subjectId, description } = req.body;
+  const { subjectId, title, description } = req.body;
   const senderId = req.user.rollno;
   console.log(req.body);
-  console.log(senderId, subjectId, description);
+  console.log(senderId, subjectId, title,description);
 
   try {
-    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, description: description });
+    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title:title, description: description });
     await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
   } catch (error) {
@@ -276,6 +276,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       {
         $addFields: {
           subjId: "$req.subjectId",
+          title: "$req.title",
           descr: "$req.description",
           status: "$req.status",
         },
