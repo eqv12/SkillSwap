@@ -81,9 +81,6 @@ app.get("/dashboard", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/incomingRequests", authenticate, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "tutoringRequests.html"));
-});
 
 app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
@@ -311,14 +308,117 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
   }
 });
 
-app.get("/incomingRequests", authenticate, async (req, res) => {
+app.get("/incomingRequests", authenticate, (req, res) => {
+  res.sendFile(path.join(__dirname, "public/tutoringRequests.html"));
+});
+app.get("/api/incomingRequests", authenticate,async (req, res) => {
   const receiverId = req.user.rollno;
+  console.log(receiverId);
   try {
-    const myReqs = await User.aggregate();
+    const myReqs = await User.aggregate([
+        {
+          $match: {
+            rollno: receiverId,
+          }
+        },
+        {
+          $unwind: {
+            path: "$skills",
+          }
+        },
+        {
+          $lookup: {
+            from: "skills",
+            localField: "skills",
+            foreignField: "_id",
+            as: "sk"
+          }
+        },
+        {
+          $addFields: {
+            skillName: {$arrayElemAt: ["$sk", 0]}
+          }
+        },
+        {
+          $addFields: {
+            skillName: "$skillName.skill"
+          }
+        },
+        {
+          $addFields: {
+            skillId: "$skills"
+          }
+        },
+        {
+          $unset: ["__v", "sk", "_id", "password", "phone", "skills"]
+        },
+        {
+          $lookup: {
+            from: "requests",
+            localField: "skillId",
+            foreignField: "subjectId",
+            as: "matchingReq"
+          }
+        },
+        {
+          $addFields: {
+            matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
+          }
+        },
+        {
+          $addFields: {
+            senderId: "$matchingReq.senderId",
+            descr: "$matchingReq.description",
+            status: "$matchingReq.status",
+            rejectedBy: "$matchingReq.rejectedBy"
+          }
+        },
+        {
+          $unwind: {
+            path: "$rejectedBy",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unset: 'matchingReq'
+        },
+        {
+        $match: {
+          $expr: {
+            $and: [
+              { $ne: ["$rollno", "$senderId"] },
+              { $ne: ["$rollno", "$rejectedBy"] }
+            ]
+          }
+        }
+      },
+      
+        {
+          $lookup: {
+            from: "users",
+            localField: "senderId",
+            foreignField: "rollno",
+            as: "senderName",
+          }
+        },
+      
+        {
+          $addFields: {
+            senderName: { $arrayElemAt: ["$senderName", 0] },
+          },
+        },
+        {
+          $addFields: {
+            senderName: "$senderName.name",
+          },
+        },
+      ]
+    );
+    console.log(myReqs);
     res.json(myReqs);
     console.log(myReqs);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+    res.status(500).json({ message: "Failed to fetch incoming requests", status: 500 });
   }
 });
 
