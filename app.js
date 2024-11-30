@@ -106,28 +106,27 @@ app.post("/register", async (req, res) => {
   const { rollno, name, password } = req.body;
   console.log(rollno, name, password);
 
-  // let email = `${rollno}@psgtech.ac.in`;
-  let email = "ramyaraja1206@gmail.com";
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // // let email = `${rollno}@psgtech.ac.in`;
+  // let email = "ramyaraja1206@gmail.com";
+  // const hashedPassword = await bcrypt.hash(password, 10);
 
-  const token = crypto.randomBytes(16).toString("hex");
-  pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
+  // const token = crypto.randomBytes(16).toString("hex");
+  // pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
 
-  const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+  // const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
 
-  console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
+  // console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
 
-  res.status(200).json({ message: "Check your email to verify your account." });
-
-  // try {
-  //   const hashedPassword = await bcrypt.hash(password, 10);
-  //   const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
-  //   await newUser.save();
-  //   res.status(201).json({ message: "User registered successfully", status: 201 });
-  // } catch (error) {
-  //   console.error("Error registering user: ", error);
-  //   res.status(500).json({ message: "Error registering user", status: 500 });
-  // }
+  // res.status(200).json({ message: "Check your email to verify your account." });
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
+    await newUser.save();
+    res.status(200).json({ message: "User registered successfully", status: 200 });
+  } catch (error) {
+    console.error("Error registering user: ", error);
+    res.status(500).json({ message: "Error registering user", status: 500 });
+  }
 });
 
 app.get("/verify-email", async (req, res) => {
