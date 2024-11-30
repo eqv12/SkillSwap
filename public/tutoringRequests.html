@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillSwap - Post Request</title>
     <link rel="stylesheet" href="styles.css" />
-    <style>
-        #uc{
-            color: gray;
-            font-size: 50px;
-            position: absolute;
-            margin: 20%;
-            left: 8%;
-        }
-    </style>
   </head>
   <body>
     <div class="navbar">
@@ -29,9 +20,53 @@
           <img src="./resources/user.svg" alt="Profile Icon" />
         </div>
       </header>
-      <div id="uc"><h1>Under Construction</h1></div>
-      
+    </div>
+
+    <div class="requests-container">
+      <div id="incomingRequest">
+        <!-- Incoming Request -->
+      </div>
+    </div>
+
+    <div id="inReq-list" class="request-container">
+      <h2>Incoming Requests</h2>
+    </div>
       <script>
+        async function fetchIncomingRequests(){
+          try{
+            const response = await fetch("http://localhost:3000/api/incomingRequests");
+            const inRequestsData=await response.json();
+            console.log(inRequestsData);
+
+            const inRequestslist = document.getElementById("inReq-list");
+
+            if(inRequestsData.length===0){
+              inRequestslist.innerHTML="<p>No Incoming Requests available. </p>";
+            }
+            else{
+              inRequestsData.forEach((request) => {
+                const inReqdiv = document.createElement("div");
+                inReqdiv.classList.add("individual-request-container");
+
+                inReqdiv.innerHTML=`<label><strong>SkillId:</strong> ${request.skillId}</label><br>
+            <label><strong>skillName:</strong> ${request.skillName}</label><br>
+            <label><strong>SenderId:</strong> ${request.senderId}</label><br>
+            <label><strong>Title:</strong> ${request.title}</label><br>
+            <label><strong>Description:</strong> ${request.descr}</label><br>
+            <label><strong>Status:</strong> ${request.status}</label><br>
+            <label><strong>SenderName:</strong> ${request.senderName}</label><br> `;
+
+             inRequestslist.appendChild(inReqdiv);
+              });
+            }
+          } catch(error){
+            console.error("Error in fetching requests: ",error);
+            const inRequestslist= document.getElementById("inReq-list");
+            inRequestslist.innerHTML="<p>Failed to load incoming requests. please try again later.</p>";
+          }
+        }
+
+        window.onload=fetchIncomingRequests;
         async function logout() {
         try {
           const response = await fetch("/logout", {
