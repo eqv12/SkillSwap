@@ -396,6 +396,7 @@ app.get("/api/incomingRequests", authenticate,async (req, res) => {
         {
           $addFields: {
             senderId: "$matchingReq.senderId",
+            title:"$matchingReq.title",
             descr: "$matchingReq.description",
             status: "$matchingReq.status",
             rejectedBy: "$matchingReq.rejectedBy"

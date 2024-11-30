@@ -78,6 +78,7 @@
 
       // Run the function when the page loads
       window.onload = fetchOutgoingRequests;
+      
       async function logout() {
         try {
           const response = await fetch("/logout", {
