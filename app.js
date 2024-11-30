@@ -12,17 +12,17 @@ import { Request } from "./models/Request.js";
 import Counter from "./models/Counter.js";
 import connectDB from "./db.js";
 import { getNextSequence } from "./utilities/getNextSequence.js";
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 // import { sendEmail } from './mailer.js';
-import crypto from 'crypto';
-  
-const pendingUsers = {}; 
+import crypto from "crypto";
+
+const pendingUsers = {};
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'anony3938@gmail.com', 
-    pass: 'bbyi yuej ceni huaa', 
+    user: "anony3938@gmail.com",
+    pass: "bbyi yuej ceni huaa",
   },
 });
 
@@ -47,7 +47,7 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 //these are the middlewares.
-const generateToken = (rollno,expiresIn="15m") => {
+const generateToken = (rollno, expiresIn = "15m") => {
   return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn });
 };
 
@@ -62,7 +62,7 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
     req.user = decoded;
     console.log("this is from authenticate req.user");
-    console.log(req.user);  
+    console.log(req.user);
     next();
   } catch (err) {
     return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
@@ -81,9 +81,6 @@ app.get("/dashboard", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/incomingRequests", authenticate, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "tutoringRequests.html"));
-});
 
 app.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
@@ -107,11 +104,11 @@ app.post("/register", async (req, res) => {
   console.log(rollno, name, password);
 
   // let email = `${rollno}@psgtech.ac.in`;
-  let email = 'ramyaraja1206@gmail.com';
+  let email = "ramyaraja1206@gmail.com";
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const token = crypto.randomBytes(16).toString('hex');
-  pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() }
+  const token = crypto.randomBytes(16).toString("hex");
+  pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
 
   const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
 
@@ -130,23 +127,23 @@ app.post("/register", async (req, res) => {
   // }
 });
 
-app.get('/verify-email', async (req, res) => {
+app.get("/verify-email", async (req, res) => {
   const { token } = req.query; // Extract token from the URL query
 
   const userData = pendingUsers[token];
   if (!userData) {
-    return res.status(400).json({ message: 'Invalid or expired token.' });
+    return res.status(400).json({ message: "Invalid or expired token." });
   }
 
   const tokenExpiration = 60 * 60 * 1000; // 1 hour in milliseconds
   if (Date.now() - userData.createdAt > tokenExpiration) {
     delete pendingUsers[token]; // Cleanup expired data
-    return res.status(400).json({ message: 'Token has expired.' });
+    return res.status(400).json({ message: "Token has expired." });
   }
 
   try {
     const newUser = new User({
-      rollno: userData.rollno, 
+      rollno: userData.rollno,
       name: userData.name,
       password: userData.hashedPassword,
     });
@@ -164,26 +161,26 @@ app.get('/verify-email', async (req, res) => {
       </script>
     `);
   } catch (error) {
-    console.error('Error saving user:', error);
-    res.status(500).json({ message: 'Error verifying email.' });
+    console.error("Error saving user:", error);
+    res.status(500).json({ message: "Error verifying email." });
   }
 });
 
-
 app.post("/login", async (req, res) => {
   console.log(req.body);
-  const { rollno, password,remember_me } = req.body;
+  const { rollno, password, remember_me } = req.body;
   try {
     const user = await User.findOne({ rollno: rollno });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const tokenExpiry = remember_me ? "7d":"15m";
-      const token = generateToken(rollno,tokenExpiry);
+      const tokenExpiry = remember_me ? "7d" : "15m";
+      const token = generateToken(rollno, tokenExpiry);
+      console.log("This is to check the cookie", token); //vulnerabiity do not keep this in the final code if kept ramya's responsibility.
       res.cookie("authToken", token, {
         httpOnly: true,
         secure: true,
         sameSite: "Strict",
-        maxAge: remember_me ? 7*24*60*60*1000:null,
+        maxAge: remember_me ? 7 * 24 * 60 * 60 * 1000 : null,
       });
 
       res.status(200).json({ message: "User credentials authenticated", status: 200 });
@@ -207,6 +204,34 @@ app.post("/logout", (req, res) => {
   } catch (error) {
     console.error("Error clearing cookie:", error);
     res.status(500).send({ error: "Failed to logout" });
+  }
+});
+
+app.post("/addUserSkill", authenticate, async (req, res) => {
+  const { skillid } = req.body;
+  const userid = req.user.rollno;
+  console.log(skillid);
+  try {
+    const newUserSkill = await User.findOneAndUpdate({ rollno: userid }, { $addToSet: { skills: skillid } }, { new: true });
+    console.log(newUserSkill);
+    res.status(200).json(newUserSkill);
+  } catch (error) {
+    console.error("Error updating skills:", error);
+    res.status(500).json({ message: "Error updating skills", error: error.message });
+  }
+});
+
+app.post("/removeUserSkill", authenticate, async (req, res) => {
+  const { skillid } = req.body;
+  const userid = req.user.rollno;
+  console.log(skillid);
+  try {
+    const removeUserSkill = await User.findOneAndUpdate({ rollno: userid }, { $pull: { skills: skillid } }, { new: true });
+    console.log(removeUserSkill);
+    res.status(200).json(removeUserSkill);
+  } catch (error) {
+    console.error("Error updating skills:", error);
+    res.status(500).json({ message: "Error updating skills", error: error.message });
   }
 });
 
@@ -235,10 +260,10 @@ app.post("/newRequest", authenticate, async (req, res) => {
   const { subjectId, title, description } = req.body;
   const senderId = req.user.rollno;
   console.log(req.body);
-  console.log(senderId, subjectId, title,description);
+  console.log(senderId, subjectId, title, description);
 
   try {
-    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title:title, description: description });
+    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description });
     await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
   } catch (error) {
@@ -312,14 +337,118 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
   }
 });
 
-app.get("/incomingRequests", authenticate, async (req, res) => {
+app.get("/incomingRequests", authenticate, (req, res) => {
+  res.sendFile(path.join(__dirname, "public/tutoringRequests.html"));
+});
+app.get("/api/incomingRequests", authenticate,async (req, res) => {
   const receiverId = req.user.rollno;
+  console.log(receiverId);
   try {
-    const myReqs = await User.aggregate();
+    const myReqs = await User.aggregate([
+        {
+          $match: {
+            rollno: receiverId,
+          }
+        },
+        {
+          $unwind: {
+            path: "$skills",
+          }
+        },
+        {
+          $lookup: {
+            from: "skills",
+            localField: "skills",
+            foreignField: "_id",
+            as: "sk"
+          }
+        },
+        {
+          $addFields: {
+            skillName: {$arrayElemAt: ["$sk", 0]}
+          }
+        },
+        {
+          $addFields: {
+            skillName: "$skillName.skill"
+          }
+        },
+        {
+          $addFields: {
+            skillId: "$skills"
+          }
+        },
+        {
+          $unset: ["__v", "sk", "_id", "password", "phone", "skills"]
+        },
+        {
+          $lookup: {
+            from: "requests",
+            localField: "skillId",
+            foreignField: "subjectId",
+            as: "matchingReq"
+          }
+        },
+        {
+          $addFields: {
+            matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
+          }
+        },
+        {
+          $addFields: {
+            senderId: "$matchingReq.senderId",
+            title:"$matchingReq.title",
+            descr: "$matchingReq.description",
+            status: "$matchingReq.status",
+            rejectedBy: "$matchingReq.rejectedBy"
+          }
+        },
+        {
+          $unwind: {
+            path: "$rejectedBy",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unset: 'matchingReq'
+        },
+        {
+        $match: {
+          $expr: {
+            $and: [
+              { $ne: ["$rollno", "$senderId"] },
+              { $ne: ["$rollno", "$rejectedBy"] }
+            ]
+          }
+        }
+      },
+      
+        {
+          $lookup: {
+            from: "users",
+            localField: "senderId",
+            foreignField: "rollno",
+            as: "senderName",
+          }
+        },
+      
+        {
+          $addFields: {
+            senderName: { $arrayElemAt: ["$senderName", 0] },
+          },
+        },
+        {
+          $addFields: {
+            senderName: "$senderName.name",
+          },
+        },
+      ]
+    );
+    console.log(myReqs);
     res.json(myReqs);
     console.log(myReqs);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+    res.status(500).json({ message: "Failed to fetch incoming requests", status: 500 });
   }
 });
 
