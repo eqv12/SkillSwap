@@ -197,7 +197,8 @@ app.get(
 app.post("/register", authenticateRegistration, async (req, res) => {
   const { password } = req.body;
   console.log(password);
-  const rollno = req.user.rollno;
+  const email = req.user.email;
+  const rollno = email.split("@")[0].toUpperCase();
   const name = req.user.name;
 
   // // let email = `${rollno}@psgtech.ac.in`;
