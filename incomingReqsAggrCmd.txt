@@ -1,98 +1,96 @@
-[
-  {
-    $match: {
-    	rollno: "24MX121"
-    }
-  },
-  {
-    $unwind: {
-      path: "$skills",
-    }
-  },
-  {
-    $lookup: {
-      from: "skills",
-      localField: "skills",
-      foreignField: "_id",
-      as: "sk"
-    }
-  },
-  {
-    $addFields: {
-      skillName: {$arrayElemAt: ["$sk", 0]}
-    }
-  },
-  {
-    $addFields: {
-      skillName: "$skillName.skill"
-    }
-  },
-  {
-    $addFields: {
-      skillId: "$skills"
-    }
-  },
-  {
-    $unset: ["__v", "sk", "_id", "password", "phone", "skills"]
-  },
-  {
-    $lookup: {
-      from: "requests",
-      localField: "skillId",
-      foreignField: "subjectId",
-      as: "matchingReq"
-    }
-  },
-  {
-    $addFields: {
-      matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
-    }
-  },
-  {
-    $addFields: {
-      senderId: "$matchingReq.senderId",
-      descr: "$matchingReq.description",
-      status: "$matchingReq.status",
-      rejectedBy: "$matchingReq.rejectedBy"
-    }
-  },
-  {
-    $unwind: {
-      path: "$rejectedBy",
-      preserveNullAndEmptyArrays: true
-    }
-  },
-  {
-    $unset: 'matchingReq'
-  },
-  {
-  $match: {
-    $expr: {
-      $and: [
-        { $ne: ["$rollno", "$senderId"] },
-        { $ne: ["$rollno", "$rejectedBy"] }
-      ]
-    }
-  }
-},
+aggregate([
+      {
+        $match: {
+          rollno: "24MX121",
+        },
+      },
+      {
+        $unwind: {
+          path: "$skills",
+        },
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "sk",
+        },
+      },
+      {
+        $addFields: {
+          skillName: { $arrayElemAt: ["$sk", 0] },
+        },
+      },
+      {
+        $addFields: {
+          skillName: "$skillName.skill",
+        },
+      },
+      {
+        $addFields: {
+          skillId: "$skills",
+        },
+      },
+      {
+        $unset: ["__v", "sk", "_id", "password", "phone", "skills"],
+      },
+      {
+        $lookup: {
+          from: "requests",
+          localField: "skillId",
+          foreignField: "subjectId",
+          as: "matchingReq",
+        },
+      },
+      {
+        $addFields: {
+          matchingReq: { $arrayElemAt: ["$matchingReq", 0] },
+        },
+      },
+      {
+        $addFields: {
+          senderId: "$matchingReq.senderId",
+          title: "$matchingReq.title",
+          descr: "$matchingReq.description",
+          status: "$matchingReq.status",
+          rejectedBy: "$matchingReq.rejectedBy",
+        },
+      },
+      {
+        $unwind: {
+          path: "$rejectedBy",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unset: "matchingReq",
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [{ $ne: ["$rollno", "$senderId"] }, { $ne: ["$rollno", "$rejectedBy"] }],
+          },
+        },
+      },
 
-  {
-    $lookup: {
-      from: "users",
-      localField: "senderId",
-      foreignField: "rollno",
-      as: "senderName"
-    }
-  },
+      {
+        $lookup: {
+          from: "users",
+          localField: "senderId",
+          foreignField: "rollno",
+          as: "senderName",
+        },
+      },
 
-  {
-    $addFields: {
-      senderName: { $arrayElemAt: ["$senderName", 0] },
-    },
-  },
-  {
-    $addFields: {
-      senderName: "$senderName.name",
-    },
-  },
-]
+      {
+        $addFields: {
+          senderName: { $arrayElemAt: ["$senderName", 0] },
+        },
+      },
+      {
+        $addFields: {
+          senderName: "$senderName.name",
+        },
+      },
+    ]);

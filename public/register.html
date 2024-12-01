@@ -15,8 +15,10 @@
     <div class="register-container">
       <form class="register-box" action="/register" method="POST">
         <img src="resources/bookslogo.png" alt="Books Icon" class="icon" />
-        <input type="text" placeholder="username" id="username" name="username" class="input-field" />
-        <input type="text" placeholder="name" id="name" name="name" class="input-field" />
+        <input type="text" placeholder="username" id="username" name="username" class="input-field" readonly />
+        <input type="text" placeholder="name" id="name" name="name" class="input-field" readonly />
+        <input type="text" placeholder="email" id="email" name="email" class="input-field" readonly />
+        <input type="text" placeholder="phone" id="phone" name="phone" class="input-field" />
         <input type="password" placeholder="password" id="password" name="password" class="input-field" />
         <input type="password" placeholder="confirm password" id="re_password" name="re_password" class="input-field" />
         <p id="pass_valid"></p>
@@ -28,6 +30,18 @@
     </div>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script> -->
     <script type="module">
+      window.onload = async () => {
+        try {
+          const response = await fetch("http://localhost:3000/register-data");
+          const data = await response.json();
+
+          document.getElementById("email").value = data.email;
+          document.getElementById("name").value = data.name;
+          document.getElementById("username").value = data.rollno;
+        } catch (err) {
+          console.error("Error fetching registration data:", err);
+        }
+      };
       function passwordChecking(password) {
         const pass_valid = document.getElementById("pass_valid");
         pass_valid.textContent = "";
@@ -95,32 +109,33 @@
 
         const data = await response.json();
         console.log(data);
-        // if (data.status == 200) {
-        //   // alert("Login successful");
-        //   document.getElementById("error-box").style.opacity = "0";
-        //   window.location.href = "http://localhost:3000/login";
-        // } else if (data.status == 500) {
-        //   //alert("Wrong credentials");
-        //   document.getElementById("error-box").style.opacity = "1";
-        // }
-
         if (data.status == 200) {
-          // Set a flag indicating email verification is needed
-          localStorage.setItem('registrationStatus', 'pending');
+          // alert("Login successful");
           document.getElementById("error-box").style.opacity = "0";
+          window.location.href = "http://localhost:3000/login";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
           document.getElementById("error-box").style.opacity = "1";
         }
 
-        document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') {
-            if (localStorage.getItem('registrationStatus') === 'verified') {
-                window.location.href = "http://localhost:3000/login";
-            }
+        {
+          //Ramya's code line for email verification begins here
+          // if (data.status == 200) {
+          //   // Set a flag indicating email verification is needed
+          //   localStorage.setItem('registrationStatus', 'pending');
+          //   document.getElementById("error-box").style.opacity = "0";
+          // } else if (data.status == 500) {
+          //   //alert("Wrong credentials");
+          //   document.getElementById("error-box").style.opacity = "1";
+          // }
+          // document.addEventListener('visibilitychange', function() {
+          // if (document.visibilityState === 'visible') {
+          //     if (localStorage.getItem('registrationStatus') === 'verified') {
+          //         window.location.href = "http://localhost:3000/login";
+          //     }
+          // }
+          //Ramya's code lines for email verification ends here
         }
-      });
-      
       });
     </script>
   </body>

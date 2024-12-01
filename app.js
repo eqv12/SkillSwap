@@ -13,6 +13,8 @@ import Counter from "./models/Counter.js";
 import connectDB from "./db.js";
 import { getNextSequence } from "./utilities/getNextSequence.js";
 import nodemailer from "nodemailer";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 // import { sendEmail } from './mailer.js';
 import crypto from "crypto";
 
@@ -46,11 +48,44 @@ app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
+app.use(passport.initialize());
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: "1096054788985-31ei5n0viof5b4rscl7a6eb0mco4vilo.apps.googleusercontent.com",
+      clientSecret: "",
+      callbackURL: "http://localhost:3000/auth/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails[0].value;
+        const name = profile.name.familyName;
+        const rollno = email.split("@")[0].toUpperCase();
+        const usercheck = await User.findOne({ rollno: rollno });
+        if (usercheck) {
+          return done(null, false);
+        }
+        // console.log(name);
+        if (!email.endsWith("@psgtech.ac.in")) {
+          return done(null, false);
+        }
+        const token = jwt.sign({ name, email, is_verified: true, purpose: "signup" }, "ramya-preethinthran-sharun", {
+          expiresIn: "10m",
+        });
+        console.log("google token successfuly passed to req.user", token);
+        done(null, token); // Pass the token as the user object
+      } catch (err) {
+        return done(err, false);
+      }
+    }
+  )
+);
+
 //these are the middlewares.
 const generateToken = (rollno, expiresIn = "15m") => {
-  return jwt.sign({ rollno }, "ramya-preethinthran-sharun", { expiresIn });
+  return jwt.sign({ rollno, purpose: "access" }, "ramya-preethinthran-sharun", { expiresIn });
 };
-
 //token authentication middleware
 const authenticate = (req, res, next) => {
   const token = req.cookies.authToken;
@@ -60,12 +95,42 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    if (decoded.purpose !== "access") {
+      return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
+    }
     req.user = decoded;
     console.log("this is from authenticate req.user");
     console.log(req.user);
     next();
   } catch (err) {
     return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
+  }
+};
+
+const authenticateRegistration = (req, res, next) => {
+  const token = req.cookies.authToken;
+  // console.log("this is the cookie that the authenticateRegistration receives.", token);
+  if (!token) {
+    return res.redirect(
+      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+    );
+  }
+
+  try {
+    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    console.log("this is from authenticateRegistration");
+    console.log(decoded);
+    if (decoded.purpose !== "signup") {
+      return res.redirect(
+        "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+      );
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.redirect(
+      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+    );
   }
 };
 
@@ -81,9 +146,15 @@ app.get("/dashboard", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-
-app.get("/register", (req, res) => {
+app.get("/register", authenticateRegistration, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
+});
+
+app.get("/register-data", authenticateRegistration, (req, res) => {
+  const email = req.user.email;
+  const name = req.user.name;
+  const rollno = email.split("@")[0].toUpperCase();
+  res.json({ name, email, rollno });
 });
 
 app.get("/newRequest", authenticate, (req, res) => {
@@ -99,32 +170,57 @@ app.get("/listSkills", async (req, res) => {
   }
 });
 
-app.post("/register", async (req, res) => {
-  const { rollno, name, password } = req.body;
-  console.log(rollno, name, password);
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-  // let email = `${rollno}@psgtech.ac.in`;
-  let email = "ramyaraja1206@gmail.com";
-  const hashedPassword = await bcrypt.hash(password, 10);
+//below is the google redirect route stupid prettier wont show name when collapsed
+app.get(
+  "/auth/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login?message=Authentication+failed.Please+try+again.",
+    failureMessage: true,
+  }),
+  (req, res) => {
+    if (req.user) {
+      // console.log("req.user is there and working", req.user);
+      res.cookie("authToken", req.user, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+        maxAge: 600000, // 10 minutes
+      });
+      res.redirect("/register");
+    }
+  }
+);
 
-  const token = crypto.randomBytes(16).toString("hex");
-  pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
+app.post("/register", authenticateRegistration, async (req, res) => {
+  const { password } = req.body;
+  console.log(password);
+  const rollno = req.user.rollno;
+  const name = req.user.name;
 
-  const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+  // // let email = `${rollno}@psgtech.ac.in`;
+  // let email = "ramyaraja1206@gmail.com";
+  // const hashedPassword = await bcrypt.hash(password, 10);
 
-  console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
+  // const token = crypto.randomBytes(16).toString("hex");
+  // pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
 
-  res.status(200).json({ message: "Check your email to verify your account." });
+  // const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
 
-  // try {
-  //   const hashedPassword = await bcrypt.hash(password, 10);
-  //   const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
-  //   await newUser.save();
-  //   res.status(201).json({ message: "User registered successfully", status: 201 });
-  // } catch (error) {
-  //   console.error("Error registering user: ", error);
-  //   res.status(500).json({ message: "Error registering user", status: 500 });
-  // }
+  // console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
+
+  // res.status(200).json({ message: "Check your email to verify your account." });
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
+    await newUser.save();
+    res.status(200).json({ message: "User registered successfully", status: 200 });
+  } catch (error) {
+    console.error("Error registering user: ", error);
+    res.status(500).json({ message: "Error registering user", status: 500 });
+  }
 });
 
 app.get("/verify-email", async (req, res) => {
@@ -340,110 +436,110 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
 app.get("/incomingRequests", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public/tutoringRequests.html"));
 });
-app.get("/api/incomingRequests", authenticate,async (req, res) => {
+app.get("/api/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
   console.log(receiverId);
   try {
     const myReqs = await User.aggregate([
-        {
-          $match: {
-            rollno: receiverId,
-          }
+      {
+        $match: {
+          rollno: receiverId,
         },
-        {
-          $unwind: {
-            path: "$skills",
-          }
+      },
+      {
+        $unwind: {
+          path: "$skills",
         },
-        {
-          $lookup: {
-            from: "skills",
-            localField: "skills",
-            foreignField: "_id",
-            as: "sk"
-          }
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "sk",
         },
-        {
-          $addFields: {
-            skillName: {$arrayElemAt: ["$sk", 0]}
-          }
+      },
+      {
+        $addFields: {
+          skillName: { $arrayElemAt: ["$sk", 0] },
         },
-        {
-          $addFields: {
-            skillName: "$skillName.skill"
-          }
+      },
+      {
+        $addFields: {
+          skillName: "$skillName.skill",
         },
-        {
-          $addFields: {
-            skillId: "$skills"
-          }
+      },
+      {
+        $addFields: {
+          skillId: "$skills",
         },
-        {
-          $unset: ["__v", "sk", "_id", "password", "phone", "skills"]
+      },
+      {
+        $unset: ["__v", "sk", "_id", "password", "phone", "skills"],
+      },
+      {
+        $lookup: {
+          from: "requests",
+          localField: "skillId",
+          foreignField: "subjectId",
+          as: "matchingReq",
         },
-        {
-          $lookup: {
-            from: "requests",
-            localField: "skillId",
-            foreignField: "subjectId",
-            as: "matchingReq"
-          }
+      },
+      {
+        $unwind: {
+          path: "$matchingReq",
         },
-        {
-          $addFields: {
-            matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
-          }
+      },
+      //   {
+      //     $addFields: {
+      //       matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
+      //     }
+      //   },
+      {
+        $addFields: {
+          senderId: "$matchingReq.senderId",
+          descr: "$matchingReq.description",
+          status: "$matchingReq.status",
+          rejectedBy: "$matchingReq.rejectedBy",
         },
-        {
-          $addFields: {
-            senderId: "$matchingReq.senderId",
-            title:"$matchingReq.title",
-            descr: "$matchingReq.description",
-            status: "$matchingReq.status",
-            rejectedBy: "$matchingReq.rejectedBy"
-          }
+      },
+      {
+        $unwind: {
+          path: "$rejectedBy",
+          preserveNullAndEmptyArrays: true,
         },
-        {
-          $unwind: {
-            path: "$rejectedBy",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $unset: 'matchingReq'
-        },
-        {
+      },
+      {
+        $unset: "matchingReq",
+      },
+      {
         $match: {
           $expr: {
-            $and: [
-              { $ne: ["$rollno", "$senderId"] },
-              { $ne: ["$rollno", "$rejectedBy"] }
-            ]
-          }
-        }
+            $and: [{ $ne: ["$rollno", "$senderId"] }, { $ne: ["$rollno", "$rejectedBy"] }],
+          },
+        },
       },
-      
-        {
-          $lookup: {
-            from: "users",
-            localField: "senderId",
-            foreignField: "rollno",
-            as: "senderName",
-          }
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "senderId",
+          foreignField: "rollno",
+          as: "senderName",
         },
-      
-        {
-          $addFields: {
-            senderName: { $arrayElemAt: ["$senderName", 0] },
-          },
+      },
+
+      {
+        $addFields: {
+          senderName: { $arrayElemAt: ["$senderName", 0] },
         },
-        {
-          $addFields: {
-            senderName: "$senderName.name",
-          },
+      },
+      {
+        $addFields: {
+          senderName: "$senderName.name",
         },
-      ]
-    );
+      },
+    ]);
     console.log(myReqs);
     res.json(myReqs);
     console.log(myReqs);
