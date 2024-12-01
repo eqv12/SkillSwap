@@ -329,10 +329,10 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       },
     ]);
     res.json(myReqs);
-    // res.render('outgoingRequests', { re
-    quests: myReqs });
-    console.log(myReqs);
-  } catch (error) {
+    // res.render('outgoingRequests', { 
+    //   requests: myReqs });
+    // console.log(myReqs);
+  } catch(error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
   }
 });
