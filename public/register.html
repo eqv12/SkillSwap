@@ -112,7 +112,7 @@
         if (data.status == 200) {
           // alert("Login successful");
           document.getElementById("error-box").style.opacity = "0";
-          window.location.href = "http://localhost:3000/login";
+          window.location.href = "http://localhost:3000/login?message=Registration+successful.+Login+to+use+the+app";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
           document.getElementById("error-box").style.opacity = "1";
