@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillSwap - Post Request</title>
     <link rel="stylesheet" href="styles.css" />
-    <style>
-        #uc{
-            color: gray;
-            font-size: 50px;
-            position: absolute;
-            margin: 20%;
-            left: 8%;
-        }
-    </style>
   </head>
   <body>
     <div class="navbar">
@@ -29,16 +20,128 @@
           <img src="./resources/user.svg" alt="Profile Icon" />
         </div>
       </header>
-      <div id="uc"><h1>Under Construction</h1></div>
-      
-      <script>
-        async function logout() {
+    </div>
+    <div class="bigcont">
+      <div class="temp-container">
+        <div class="user-skill-add">
+          <select id="topic" name="topic" class="input-field" required>
+            <option>Select a skill to add</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <button id="addSkillButton">+</button>
+      </div>
+      <div class="smallbox1" id="smallboxfirst"></div>
+      <div class="smallbox2">Div 2</div>
+    </div>
+    <script>
+      async function listData() {
+        try {
+          const subListJson = await fetch("http://localhost:3000/missingSkills");
+          const subListData = await subListJson.json();
+          console.log(subListData);
+          const topicDropdown = document.getElementById("topic");
+          subListData.forEach((skill) => {
+            const option = document.createElement("option");
+            option.value = skill._id;
+            option.textContent = skill.skill;
+            topicDropdown.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      window.onload = listData();
+      async function listUserSkill() {
+        try {
+          const userSkillJson = await fetch("http://localhost:3000/userSkills");
+          const UserSkills = await userSkillJson.json();
+          console.log(UserSkills);
+          UserSkills.forEach((skill) => {
+            const skillDiv = document.createElement("div");
+            skillDiv.textContent = skill.name[0]; // Display skill name
+            skillDiv.setAttribute("class", "skillItem");
+
+            // Create the close button div
+            const closeButtonDiv = document.createElement("div");
+            closeButtonDiv.setAttribute("class", "closeButton");
+            closeButtonDiv.setAttribute("class", "trashItem"); // Add skill ID to the close button
+            closeButtonDiv.setAttribute("data-id", skill.name[1]); // Add skill ID to the close button
+            closeButtonDiv.innerHTML = "<img src='./resources/close.svg' alt='Profile Icon' >"; // Unicode for a close (X) icon
+
+            // Add click event listener to the close button
+            closeButtonDiv.addEventListener("click", async function (event) {
+              const skillId = closeButtonDiv.getAttribute("data-id"); // Get the skill ID
+              console.log(`Skill with ID ${skillId} clicked.`); // Log for debugging
+
+              const response = await fetch("http://localhost:3000/removeUserSkill", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ skillid: skillId }),
+              });
+              const data = await response.json();
+              // console.log(data);
+              if (data.status == 200) {
+              } else if (data.status == 401) {
+              }
+
+              // Remove the parent skill div from the UI
+              skillDiv.remove();
+              document.getElementById("topic").innerHTML = "<option>Select a skill to add</option>";
+              listData();
+              // Prevent event propagation to avoid triggering skillDiv click events
+              event.stopPropagation();
+            });
+
+            // Append the close button to the skill div
+            skillDiv.appendChild(closeButtonDiv);
+
+            // Append the skill div to the container
+            skillContainer.appendChild(skillDiv);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      window.onload = listUserSkill();
+
+      // Reference to the div where skills will be displayed
+      const skillContainer = document.querySelector(".smallbox1");
+
+      // Render skills dynamically
+      document.getElementById("addSkillButton").addEventListener("click", async function (event) {
+        const skillToAdd = document.getElementById("topic").value;
+        console.log(skillToAdd);
+        const response = await fetch("http://localhost:3000/addUserSkill", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ skillid: skillToAdd }),
+        });
+        document.getElementById("smallboxfirst").innerHTML = " ";
+        document.getElementById("topic").innerHTML = "<option>Select a skill to add</option>";
+        listData();
+        listUserSkill();
+        const data = await response.json();
+        console.log(data);
+        if (data.status == 200) {
+          // alert("Login successful");
+          // document.getElementById("error-box").style.opacity = "0";
+        } else if (data.status == 401) {
+          // alert("Wrong credentials");
+          // document.getElementById("error-box").style.opacity = "1";
+        }
+      });
+      async function logout() {
         try {
           const response = await fetch("/logout", {
             method: "POST",
             credentials: "include",
           });
-          console.log(response);
           if (response.status === 200) {
             window.location.href = "http://localhost:3000/login";
           } else {
@@ -48,5 +151,6 @@
           console.error("Error during logout:", error);
         }
       }
-      </script>
+    </script>
   </body>
+</html>
