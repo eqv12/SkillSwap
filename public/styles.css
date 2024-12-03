@@ -278,14 +278,18 @@ textarea {
   align-content: flex-start;
 }
 .smallbox2 {
-  background-color: #b1ee2f;
-  padding: 2vw;
+  background-color: #d087e4;
+  padding-top: 2vw;
   margin: 1.5vw;
   border-radius: 20px;
   position: absolute;
   right: 0.2vw;
   height: 87vh;
   width: 20vw;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 .skillItem {
   display: flex;
@@ -313,4 +317,24 @@ textarea {
   border-radius: 10px;
   margin: 15%;
   position: relative;
+}
+
+.profile-pic {
+  background-color: #2b0038;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+}
+.profile {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: self-start;
+  gap: 100px;
+  margin-top: 5%;
+  background-color: #d087e4;
+  width: 100%;
+  height: 65vh;
+  border-radius: 10px;
 }

@@ -17,6 +17,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 // import { sendEmail } from './mailer.js';
 import crypto from "crypto";
+import { title } from "process";
 
 const pendingUsers = {};
 
@@ -474,7 +475,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           title: "$req.title",
           descr: "$req.description",
           status: "$req.status",
-          requestId:"$req._id",
+          requestId: "$req._id",
         },
       },
       {
@@ -586,6 +587,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       //   },
       {
         $addFields: {
+          title: "$matchingReq.title",
           senderId: "$matchingReq.senderId",
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
