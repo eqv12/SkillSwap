@@ -146,6 +146,8 @@ app.get("/dashboard", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
+app.get("/dashboard-data", authenticate, (req, res) => {});
+
 app.get("/register", authenticateRegistration, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
@@ -167,6 +169,77 @@ app.get("/listSkills", async (req, res) => {
     res.json(skills);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch skills", status: 500 });
+  }
+});
+
+app.get("/missingSkills", async (req, res) => {
+  try {
+    const skills = await User.aggregate([
+      {
+        $match: {
+          rollno: "24MX125",
+        },
+      },
+      {
+        $project: {
+          skills: 1,
+          _id: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "result",
+        },
+      },
+    ]);
+    const missingSkills = await Skill.find({
+      _id: { $nin: skills[0].skills },
+    });
+    res.json(missingSkills);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch missing skills", status: 500 });
+  }
+});
+
+app.get("/userSkills", authenticate, async (req, res) => {
+  try {
+    const skills = await User.aggregate([
+      {
+        $match: {
+          rollno: req.user.rollno,
+        },
+      },
+      {
+        $unwind: {
+          path: "$skills",
+        },
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "name",
+        },
+      },
+      {
+        $unwind: {
+          path: "$name",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: ["$name.skill", "$name._id"],
+        },
+      },
+    ]);
+    res.json(skills);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch skills for this user", status: 500 });
   }
 });
 
@@ -401,6 +474,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           title: "$req.title",
           descr: "$req.description",
           status: "$req.status",
+          requestId:"$req._id",
         },
       },
       {
@@ -422,7 +496,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
         },
       },
       {
-        $unset: ["req", "sk", "password", "_id", "__v", "subjId", "phone", "skills"],
+        $unset: ["req", "sk", "password", "__v", "subjId", "phone", "skills"],
       },
     ]);
     res.json(myReqs);
@@ -431,6 +505,21 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
     // console.log(myReqs);
   } catch(error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+  }
+});
+
+app.delete("/api/outgoingRequests/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedRequest = await Request.findByIdAndDelete(id);
+    if (deletedRequest) {
+      res.status(200).json({ message: "Request deleted successfully", status: 200 });
+    } else {
+      res.status(404).json({ message: "Request not found", status: 404 });
+    }
+  } catch (error) {
+    console.error("Error deleting request:", error);
+    res.status(500).json({ message: "Failed to delete request", status: 500 });
   }
 });
 

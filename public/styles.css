@@ -59,7 +59,8 @@ header {
   margin-bottom: 15px;
 }
 
-.input-field, .individual-request-container {
+.input-field,
+.individual-request-container {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
@@ -255,6 +256,63 @@ textarea {
   border-radius: 10px;
   font-size: larger;
   opacity: 0;
+}
+.bigcont {
+  display: flex;
+  height: 91.5vh;
+  background-color: pink;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+.smallbox1 {
+  background-color: #2ecc71;
+  padding: 2vw;
+  margin: 1.5vw;
+  border-radius: 20px;
+  height: 50vh;
+  width: 75vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  gap: 20px;
+  align-content: flex-start;
+}
+.smallbox2 {
+  background-color: #b1ee2f;
+  padding: 2vw;
+  margin: 1.5vw;
+  border-radius: 20px;
+  position: absolute;
+  right: 0.2vw;
+  height: 87vh;
+  width: 20vw;
+}
+.skillItem {
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  padding: 25px;
+  border-radius: 10px;
+  background-color: lightblue;
+  height: 25px;
+}
+.trashItem {
+  position: relative;
+  left: 20px;
+  top: 2px;
+}
+
+.user-skill-add {
+  width: 50vw;
+  margin-left: 1.5vw;
+}
+
+#addSkillButton {
+  font-size: 35px;
+  width: 3vw;
+  border-radius: 10px;
+  margin: 15%;
+  position: relative;
 }
 
 .acceptBtn, .rejectBtn {

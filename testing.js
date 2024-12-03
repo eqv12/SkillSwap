@@ -8,22 +8,22 @@ import Counter from "./models/Counter.js";
 
 await connectDB();
 
-const user = await User.findOne({ rollno: "24MX121" }, { _id: 0, skills: 1 });
-const userSkills = user?.skills;
-console.log(userSkills);
-const final = await Request.find(
-  {
-    subjectId: { $in: userSkills },
-    status: "Pending",
-  },
-  {
-    senderId: 1,
-    description: 1,
-    subjectId: 1,
-    _id: 0,
-  }
-);
-console.log(final);
+// const user = await User.findOne({ rollno: "24MX121" }, { _id: 0, skills: 1 });
+// const userSkills = user?.skills;
+// console.log(userSkills);
+// const final = await Request.find(
+//   {
+//     subjectId: { $in: userSkills },
+//     status: "Pending",
+//   },
+//   {
+//     senderId: 1,
+//     description: 1,
+//     subjectId: 1,
+//     _id: 0,
+//   }
+// );
+// console.log(final);
 
 // const final = await Request.find(
 //   {
@@ -38,3 +38,63 @@ console.log(final);
 //   }
 // );
 // console.log(final);
+
+// const skills = await User.aggregate([
+//   {
+//     $match: {
+//       rollno: "24MX125",
+//     },
+//   },
+//   {
+//     $unwind: {
+//       path: "$skills",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "skills",
+//       localField: "skills",
+//       foreignField: "_id",
+//       as: "name",
+//     },
+//   },
+//   {
+//     $unwind: {
+//       path: "$name",
+//     },
+//   },
+//   {
+//     $project: {
+//       _id: 0,
+//       name: ["$name.skill", "$name._id"],
+//     },
+//   },
+// ]);
+const skills = await User.aggregate([
+  {
+    $match: {
+      rollno: "24MX125",
+    },
+  },
+  {
+    $project: {
+      skills: 1,
+      _id: 0,
+    },
+  },
+  {
+    $lookup: {
+      from: "skills",
+      localField: "skills",
+      foreignField: "_id",
+      as: "result",
+    },
+  },
+]);
+const missingSkills = await Skill.find({
+  _id: { $nin: skills[0].skills },
+});
+
+const what = await Skill.find({});
+console.log(what);
+// skills.forEach((skill) => console.log(skill.name[0]));
