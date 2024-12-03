@@ -147,7 +147,15 @@ app.get("/dashboard", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/dashboard-data", authenticate, (req, res) => {});
+app.get("/dashboard-data", authenticate, async (req, res) => {
+  try {
+    const userdeets = await User.find({ rollno: req.user.rollno });
+    console.log(userdeets);
+    res.json(userdeets);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user details", status: 500 });
+  }
+});
 
 app.get("/register", authenticateRegistration, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
@@ -501,8 +509,9 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       },
     ]);
     res.json(myReqs);
-    // res.render('outgoingRequests', { requests: myReqs });
-    console.log(myReqs);
+    // res.render('outgoingRequests', {
+    //   requests: myReqs });
+    // console.log(myReqs);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
   }
@@ -526,6 +535,7 @@ app.delete("/api/outgoingRequests/:id", authenticate, async (req, res) => {
 app.get("/incomingRequests", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public/tutoringRequests.html"));
 });
+
 app.get("/api/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
   console.log(receiverId);
@@ -587,11 +597,23 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       //   },
       {
         $addFields: {
-          title: "$matchingReq.title",
+          reqId: "$matchingReq._id",
           senderId: "$matchingReq.senderId",
+          title: "$matchingReq.title",
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
           rejectedBy: "$matchingReq.rejectedBy",
+          timestamp: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $toDate: "$matchingReq._id" },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          status: "Pending",
         },
       },
       {
@@ -636,6 +658,57 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
     console.log(myReqs);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch incoming requests", status: 500 });
+  }
+});
+
+app.post("/api/request/:reqId/accept", authenticate, async (req, res) => {
+  console.log("accepting");
+  const { reqId } = req.params;
+  console.log(req.user);
+  try {
+    const request = await Request.findById(reqId);
+    console.log(request);
+    if (request) {
+      request.status = "Accepted";
+      request.tutorId = req.user.rollno;
+
+      await request.save();
+      res.status(200).send({ message: "Request accepted" });
+    } else {
+      res.status(404).send({ error: "Request not found" });
+    }
+  } catch (error) {
+    res.status(500).send({ error: "Internal Sever Error" });
+  }
+});
+
+app.post("/api/request/reject", authenticate, async (req, res) => {
+  console.log("testtesttest");
+  const { reqId } = req.body;
+  console.log(reqId);
+  try {
+    const request = await Request.findById(reqId);
+    console.log(request);
+    if (request) {
+      console.log("right before push into rejectedBy array");
+      console.log(request.rejectedBy);
+      // const result = await Request.updateOne(
+      //   { _id: reqId },
+      //   { $addToSet: { rejectedBy: req.user.rollno } }
+      // );
+      // request.rejectedBy = [...request.rejectedBy, req.user.rollno];
+      try {
+        request.rejectedBy.addToSet(req.user.rollno);
+        await request.save();
+      } catch (err) {
+        console.error("Error updating request:", err);
+      }
+      res.status(200).send({ message: "Request rejected" });
+    } else {
+      res.status(404).send({ error: "Request not found" });
+    }
+  } catch (error) {
+    res.status(500).send({ error: "Internal Sever Error" });
   }
 });
 

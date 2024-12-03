@@ -38,14 +38,32 @@
           <img src="./resources/user.svg" alt="Profile Icon" />
         </div>
         <div class="profile">
-          <p id="name">Sharun</p>
-          <p id="rollno">24MX125</p>
-          <p id="email">24mx125@psgtech.ac.in</p>
-          <p id="phone">8903007888</p>
+          <p id="name"></p>
+          <p id="rollno"></p>
+          <p id="email"></p>
+          <p id="phone"></p>
         </div>
       </div>
     </div>
     <script>
+      async function userdeets() {
+        try {
+          const subListJson = await fetch("http://localhost:3000/dashboard-data");
+          const userData = await subListJson.json();
+          console.log(userData);
+          const name = document.getElementById("name");
+          const rollno = document.getElementById("rollno");
+          const email = document.getElementById("email");
+          const phone = document.getElementById("phone");
+          name.textContent = userData[0].name;
+          rollno.textContent = userData[0].rollno;
+          phone.textContent = userData[0].phone;
+          email.textContent = userData[0].rollno + "@psgtech.ac.in";
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+      window.onload = userdeets();
       async function listData() {
         try {
           const subListJson = await fetch("http://localhost:3000/missingSkills");

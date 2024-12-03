@@ -31,43 +31,89 @@
     <div id="inReq-list" class="request-container">
       <h2>Incoming Requests</h2>
     </div>
-      <script>
-        async function fetchIncomingRequests(){
-          try{
-            const response = await fetch("http://localhost:3000/api/incomingRequests");
-            const inRequestsData=await response.json();
-            console.log(inRequestsData);
+    <script>
+      async function fetchIncomingRequests() {
+        try {
+          const response = await fetch("http://localhost:3000/api/incomingRequests");
+          const inRequestsData = await response.json();
+          console.log(inRequestsData);
+          // <label><strong>Request Date:</strong> ${reqTime}</label><br>
+          const inRequestslist = document.getElementById("inReq-list");
 
-            const inRequestslist = document.getElementById("inReq-list");
+          if (inRequestsData.length === 0) {
+            inRequestslist.innerHTML = "<p>No Incoming Requests available. </p>";
+          } else {
+            inRequestsData.forEach((request) => {
+              const inReqdiv = document.createElement("div");
+              inReqdiv.classList.add("individual-request-container");
 
-            if(inRequestsData.length===0){
-              inRequestslist.innerHTML="<p>No Incoming Requests available. </p>";
-            }
-            else{
-              inRequestsData.forEach((request) => {
-                const inReqdiv = document.createElement("div");
-                inReqdiv.classList.add("individual-request-container");
+              inReqdiv.innerHTML = `<label><strong>SkillId:</strong> ${request.skillId}</label><br>
+              <label><strong>skillName:</strong> ${request.skillName}</label><br>
+              <label><strong>SenderId:</strong> ${request.senderId}</label><br>
+              <label><strong>Title:</strong> ${request.title}</label><br>
+              <label><strong>Description:</strong> ${request.descr}</label><br>
+              <label><strong>Status:</strong> ${request.status}</label><br>
+              <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
+              <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
+               
+              <button class="acceptBtn" onclick="acceptRequest('${request.reqId}', this)">Accept</button>
+              <button class="rejectBtn" onclick="rejectRequest('${request.reqId}', this)">Reject</button>`;
 
-                inReqdiv.innerHTML=`<label><strong>SkillId:</strong> ${request.skillId}</label><br>
-            <label><strong>skillName:</strong> ${request.skillName}</label><br>
-            <label><strong>SenderId:</strong> ${request.senderId}</label><br>
-            <label><strong>Title:</strong> ${request.title}</label><br>
-            <label><strong>Description:</strong> ${request.descr}</label><br>
-            <label><strong>Status:</strong> ${request.status}</label><br>
-            <label><strong>SenderName:</strong> ${request.senderName}</label><br> `;
-
-             inRequestslist.appendChild(inReqdiv);
-              });
-            }
-          } catch(error){
-            console.error("Error in fetching requests: ",error);
-            const inRequestslist= document.getElementById("inReq-list");
-            inRequestslist.innerHTML="<p>Failed to load incoming requests. please try again later.</p>";
+              inRequestslist.appendChild(inReqdiv);
+            });
           }
+        } catch (error) {
+          console.error("Error in fetching requests: ", error);
+          const inRequestslist = document.getElementById("inReq-list");
+          inRequestslist.innerHTML = "<p>Failed to load incoming requests. please try again later.</p>";
         }
+      }
 
-        window.onload=fetchIncomingRequests;
-        async function logout() {
+      window.onload = fetchIncomingRequests;
+
+      async function acceptRequest(reqId, button) {
+        try {
+          const response = await fetch(`/api/request/${reqId}/accept`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          if (response.ok) {
+            button.disabled = true;
+            const rejectBtn = button.nextElementSibling;
+            rejectBtn.disabled = true;
+
+            // const requestDiv = button.parentElement;
+            rejectBtn.insertAdjacentHTML("afterend", "    Request accepted");
+          }
+        } catch (error) {
+          console.error("Error accepting request: ", error);
+        }
+      }
+
+      async function rejectRequest(reqId, button) {
+        try {
+          // console.log("html")
+          const response = await fetch("http://localhost:3000/api/request/reject", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reqId: reqId }),
+          });
+          console.log(response);
+          if (response.ok) {
+            button.disabled = true;
+            const acceptBtn = button.previousElementSibling;
+            acceptBtn.disabled = true;
+
+            // const requestDiv = button.parentElement;
+            button.insertAdjacentHTML("afterend", "    Request rejected");
+          }
+        } catch (error) {
+          console.error("Error accepting request: ", error);
+        }
+      }
+
+      async function logout() {
         try {
           const response = await fetch("/logout", {
             method: "POST",
@@ -83,5 +129,6 @@
           console.error("Error during logout:", error);
         }
       }
-      </script>
+    </script>
   </body>
+</html>
