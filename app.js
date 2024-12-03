@@ -437,6 +437,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
 app.get("/incomingRequests", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "public/tutoringRequests.html"));
 });
+
 app.get("/api/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
   console.log(receiverId);
@@ -498,11 +499,24 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       //   },
       {
         $addFields: {
+          reqId: "$matchingReq._id",
           senderId: "$matchingReq.senderId",
+          title: "$matchingReq.title",
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
           rejectedBy: "$matchingReq.rejectedBy",
+          timestamp: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: {$toDate: "$matchingReq._id"}
+            }
+          }
         },
+      },
+      {
+        $match: {
+          status: "Pending"
+        }
       },
       {
         $unwind: {
@@ -548,6 +562,59 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch incoming requests", status: 500 });
   }
 });
+
+app.post('/api/request/:reqId/accept', authenticate, async (req, res) => {
+  console.log("accepting") 
+    const {reqId} = req.params;
+    console.log(req.user);
+    try {
+      const request = await Request.findById(reqId);
+      console.log(request);
+      if (request) {
+        request.status = 'Accepted';
+        request.tutorId = req.user.rollno;
+
+        await request.save();
+        res.status(200).send({ message: "Request accepted" });
+      }
+      else {
+        res.status(404).send({error: "Request not found"});
+      }
+    }
+    catch (error){
+      res.status(500).send({error: "Internal Sever Error"});
+    }
+  }
+)
+
+app.post('/api/request/:reqId/reject', authenticate, async (req, res) => { 
+  console.log("testtesttest")
+  const {reqId} = req.params;
+  console.log(req.user);
+  try {
+    const request = await Request.findById(reqId);
+    console.log(request);
+    if (request) {
+      console.log("right before push into rejectedBy array")
+      console.log(request.rejectedBy)
+      // const result = await Request.updateOne(
+      //   { _id: reqId },
+      //   { $addToSet: { rejectedBy: req.user.rollno } }  
+      // );
+      // request.rejectedBy = [...request.rejectedBy, req.user.rollno];
+      request.rejectedBy.addToSet(req.user.rollno);
+      await request.save();
+      res.status(200).send({ message: "Request rejected" });
+    }
+    else {
+      res.status(404).send({error: "Request not found"});
+    }
+  }
+  catch (error){
+    res.status(500).send({error: "Internal Sever Error"});
+  }
+}
+)
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -256,3 +256,20 @@ textarea {
   font-size: larger;
   opacity: 0;
 }
+
+.acceptBtn, .rejectBtn {
+  border: none;
+  height: 35px;
+  width:60px;
+  border-radius: 10px;
+}
+
+.acceptBtn {
+  background-color: green;
+  color: white;
+}
+
+.rejectBtn {
+  background-color: red;
+  color: white;
+}
