@@ -54,7 +54,7 @@ passport.use(
   new GoogleStrategy(
     {
       clientID: "1096054788985-31ei5n0viof5b4rscl7a6eb0mco4vilo.apps.googleusercontent.com",
-      clientSecret: "",
+      clientSecret: "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",
       callbackURL: "http://localhost:3000/auth/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -401,6 +401,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           title: "$req.title",
           descr: "$req.description",
           status: "$req.status",
+          requestId:"$req._id",
         },
       },
       {
@@ -422,7 +423,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
         },
       },
       {
-        $unset: ["req", "sk", "password", "_id", "__v", "subjId", "phone", "skills"],
+        $unset: ["req", "sk", "password", "__v", "subjId", "phone", "skills"],
       },
     ]);
     res.json(myReqs);
@@ -430,6 +431,21 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
     console.log(myReqs);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch outgoing requests", status: 500 });
+  }
+});
+
+app.delete("/api/outgoingRequests/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedRequest = await Request.findByIdAndDelete(id);
+    if (deletedRequest) {
+      res.status(200).json({ message: "Request deleted successfully", status: 200 });
+    } else {
+      res.status(404).json({ message: "Request not found", status: 404 });
+    }
+  } catch (error) {
+    console.error("Error deleting request:", error);
+    res.status(500).json({ message: "Failed to delete request", status: 500 });
   }
 });
 
