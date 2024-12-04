@@ -8,6 +8,7 @@ const requestSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   status: { type: String, enum: ["Pending", "Accepted", "Rejected"], default: "Pending", index: true },
+  phoneVisible:{type: Boolean, default:false},
   rejectedBy: [{ type: String, ref: "User" }],
 });
 

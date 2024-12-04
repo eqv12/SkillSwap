@@ -436,13 +436,13 @@ app.post("/addSkill", async (req, res) => {
 });
 
 app.post("/newRequest", authenticate, async (req, res) => {
-  const { subjectId, title, description } = req.body;
+  const { subjectId, title, description, phoneVisible } = req.body;
   const senderId = req.user.rollno;
   console.log(req.body);
   console.log(senderId, subjectId, title, description);
 
   try {
-    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description });
+    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description, phoneVisible: phoneVisible});
     await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
   } catch (error) {
@@ -484,6 +484,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           descr: "$req.description",
           status: "$req.status",
           requestId: "$req._id",
+          phoneVisible:"$req.phoneVisible",
         },
       },
       {
@@ -575,7 +576,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
         },
       },
       {
-        $unset: ["__v", "sk", "_id", "password", "phone", "skills"],
+        $unset: ["__v", "sk", "_id", "password", "skills"],
       },
       {
         $lookup: {
@@ -603,6 +604,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
           rejectedBy: "$matchingReq.rejectedBy",
+          phoneVisible:"$matchingReq.phoneVisible",
           timestamp: {
             $dateToString: {
               format: "%Y-%m-%d",
@@ -650,8 +652,18 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       {
         $addFields: {
           senderName: "$senderName.name",
+          senderPhone:{
+            $cond:{
+              if:{ $eq :["$phoneVisible",true]},
+              then:"$senderName.phone",
+              else: null,
+            },
+          },
         },
       },
+      {
+        $unset:["SenderName","__v","password"],
+      }
     ]);
     console.log(myReqs);
     res.json(myReqs);
