@@ -304,6 +304,7 @@ textarea {
   position: relative;
   left: 20px;
   top: 2px;
+  cursor: pointer;
 }
 
 .user-skill-add {
@@ -317,6 +318,7 @@ textarea {
   border-radius: 10px;
   margin: 15%;
   position: relative;
+  cursor: pointer;
 }
 
 .profile-pic {
@@ -341,11 +343,13 @@ textarea {
   border-radius: 10px;
 }
 .acceptBtn,
-.rejectBtn {
+.rejectBtn,
+.delete-btn {
   border: none;
   height: 35px;
   width: 60px;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .acceptBtn {
@@ -353,7 +357,8 @@ textarea {
   color: white;
 }
 
-.rejectBtn {
+.rejectBtn,
+.delete-btn {
   background-color: red;
   color: white;
 }
@@ -374,4 +379,14 @@ textarea {
 .rejectBtn {
   background-color: red;
   color: white;
+}
+.delete-btn {
+  position: relative;
+  top: 5px;
+}
+.forgot-password a {
+  text-decoration: none;
+}
+.forgot-password {
+  text-decoration: none;
 }
