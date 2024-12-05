@@ -538,6 +538,9 @@ app.get("/incomingRequests", authenticate, (req, res) => {
 
 app.get("/api/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
+  const requestStatus = req.query.status || 'Pending';
+  console.log(requestStatus)
+
   console.log(receiverId);
   try {
     const myReqs = await User.aggregate([
@@ -613,7 +616,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       },
       {
         $match: {
-          status: "Pending",
+          status: requestStatus,
         },
       },
       {

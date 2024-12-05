@@ -22,23 +22,50 @@
       </header>
     </div>
 
-    <div class="requests-container">
-      <div id="incomingRequest">
-        <!-- Incoming Request -->
+    
+    <div id="req-wrapper" class="request-container">
+      <h2>Incoming Requests</h2>
+      <div id="toggleContainer">
+        <button id="showPending">Pending Requests</button>
+        <button id="showAccepted">Accepted Requests</button>
+
+        <div id="filterContainer">
+          <!-- <label for="subjectFilter">Filter: </label> -->
+          <select id="subjectFilter" onchange="filterRequestsBySubject()">
+            <option value="">--Select Subject--</option>
+            <!-- Dropdown options will be populated here dynamically -->
+          </select>
+        </div>
+      </div>
+
+      
+      <div id="inReq-list" >
+      
       </div>
     </div>
 
-    <div id="inReq-list" class="request-container">
-      <h2>Incoming Requests</h2>
-    </div>
     <script>
+      let status = 'Pending';
       async function fetchIncomingRequests() {
         try {
-          const response = await fetch("http://localhost:3000/api/incomingRequests");
+          
+          const response = await fetch(`http://localhost:3000/api/incomingRequests?status=${status}`);
           const inRequestsData = await response.json();
           console.log(inRequestsData);
+
+          const subjects = new Set();
+          inRequestsData.forEach(request => {
+            subjects.add(request.skillName);
+          })
+
+          const uniqueSubjArr = [...subjects]
+          console.log("&&&&", uniqueSubjArr)
+          populateFilterDropdown(uniqueSubjArr)
+
+
           // <label><strong>Request Date:</strong> ${reqTime}</label><br>
           const inRequestslist = document.getElementById("inReq-list");
+          inRequestslist.innerHTML = '';
 
           if (inRequestsData.length === 0) {
             inRequestslist.innerHTML = "<p>No Incoming Requests available. </p>";
@@ -46,6 +73,7 @@
             inRequestsData.forEach((request) => {
               const inReqdiv = document.createElement("div");
               inReqdiv.classList.add("individual-request-container");
+              inReqdiv.setAttribute("data-subject", request.skillName);
 
               inReqdiv.innerHTML = `<label><strong>SkillId:</strong> ${request.skillId}</label><br>
               <label><strong>skillName:</strong> ${request.skillName}</label><br>
@@ -56,8 +84,14 @@
               <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
               <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
                
-              <button class="acceptBtn" onclick="acceptRequest('${request.reqId}', this)">Accept</button>
-              <button class="rejectBtn" onclick="rejectRequest('${request.reqId}', this)">Reject</button>`;
+              <button class="acceptBtn tutor-btns" onclick="acceptRequest('${request.reqId}', this)">Accept</button>
+              <button class="rejectBtn tutor-btns" onclick="rejectRequest('${request.reqId}', this)">Reject</button>`;
+
+              console.log(request.descr, request.status);
+              if (request.status == 'Accepted'){
+                let tutorBtns = inReqdiv.getElementsByClassName("tutor-btns");
+                Array.from(tutorBtns).forEach(btn => btn.style.display = 'none');
+              }
 
               inRequestslist.appendChild(inReqdiv);
             });
@@ -90,6 +124,57 @@
           console.error("Error accepting request: ", error);
         }
       }
+
+      function populateFilterDropdown(subjects){
+        const filterDropdown = document.getElementById('subjectFilter');
+        filterDropdown.innerHTML = '';
+        const defaultOpt = document.createElement("option");
+        defaultOpt.value = '--Select Subject--';
+        defaultOpt.textContent = '--Select Subject--';
+        filterDropdown.appendChild(defaultOpt);
+
+
+        subjects.forEach(subject => {
+          const option = document.createElement("option");
+          option.value = subject;
+          option.textContent = subject;
+          filterDropdown.appendChild(option);
+        })
+      }
+
+      function filterBySubject(selectedSubj){
+        const inRequestslist = document.getElementById("inReq-list");
+        const allRequests = inRequestslist.getElementsByClassName("individual-request-container");
+
+        Array.from(allRequests).forEach(reqDiv => {
+          const reqSubj = reqDiv.getAttribute("data-subject");
+          if (selectedSubj === '--Select Subject--' || reqSubj == selectedSubj){
+            reqDiv.style.display = 'block';
+          }
+          else {
+            reqDiv.style.display = 'none';
+          }
+        })
+      }
+
+      document.getElementById("subjectFilter").addEventListener("change", function(event){
+        const selectedSubj = event.target.value;
+        filterBySubject(selectedSubj);
+      });
+
+      document.getElementById("showAccepted").addEventListener("click", function() {
+        document.getElementById("showAccepted").style.backgroundColor = "green";
+        document.getElementById("showPending").style.backgroundColor = "#d087e4";
+        status = "Accepted";
+        fetchIncomingRequests();
+      })
+
+      document.getElementById("showPending").addEventListener("click", function() {
+        document.getElementById("showAccepted").style.backgroundColor = "#d087e4";
+        document.getElementById("showPending").style.backgroundColor = "green";
+        status = "Pending";
+        fetchIncomingRequests();
+      })
 
       async function rejectRequest(reqId, button) {
         try {

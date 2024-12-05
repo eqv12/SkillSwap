@@ -375,3 +375,45 @@ textarea {
   background-color: red;
   color: white;
 }
+
+#toggleContainer {
+  position: relative;
+  /* top: 8px; */
+  /* background-color: #d087e4; */
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+  /* margin-bottom: 5px; */
+}
+
+#toggleContainer button{
+  
+  border: none;
+  border-radius: 5px;
+  height: 35px;
+  width:150px;
+  color: white;
+}
+
+#showPending {
+  background-color: green;
+}
+
+#showAccepted {
+  background-color: #d087e4;
+}
+
+#subjectFilter {
+
+  border: none;
+  border-radius: 5px;
+  width: 180px;
+  height: 35px;
+  padding: 5px;
+  background-color: #e6e3e7;
+}
+
+#filterContainer {
+  margin-left: 40px;
+  display: inline;
+}
