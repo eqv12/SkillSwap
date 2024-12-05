@@ -82,6 +82,7 @@
               <label><strong>Description:</strong> ${request.descr}</label><br>
               <label><strong>Status:</strong> ${request.status}</label><br>
               <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
+              ${request.phoneVisible ?`<label><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>`:""}
               <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
                
               <button class="acceptBtn tutor-btns" onclick="acceptRequest('${request.reqId}', this)">Accept</button>

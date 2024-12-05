@@ -82,6 +82,38 @@ passport.use(
     }
   )
 );
+//the one blow is for password reset.
+passport.use(
+  "google-password-reset",
+  new GoogleStrategy(
+    {
+      clientID: "1096054788985-31ei5n0viof5b4rscl7a6eb0mco4vilo.apps.googleusercontent.com",
+      clientSecret: "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",
+      callbackURL: "http://localhost:3000/auth/password-reset-callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails[0].value;
+        const rollno = email.split("@")[0].toUpperCase();
+        const name = profile.name.familyName;
+        const user = await User.findOne({ rollno: rollno });
+
+        if (!user || !email.endsWith("@psgtech.ac.in")) {
+          return done(null, false);
+        }
+
+        const token = jwt.sign({ name, rollno, email, purpose: "password_reset" }, "ramya-preethinthran-sharun", {
+          expiresIn: "10m",
+        });
+        console.log("Password reset token generated", token);
+
+        done(null, token); // Pass the token to the flow
+      } catch (err) {
+        return done(err, false);
+      }
+    }
+  )
+);
 
 //these are the middlewares.
 const generateToken = (rollno, expiresIn = "15m") => {
@@ -106,6 +138,24 @@ const authenticate = (req, res, next) => {
   } catch (err) {
     return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
   }
+};
+
+const authenticateLogin = (req, res, next) => {
+  const token = req.cookies.authToken;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+      if (decoded && decoded.purpose === "access") {
+        return res.redirect("http://localhost:3000/outgoingRequests");
+      }
+      req.user = decoded;
+      console.log("this is from authenticate login");
+    } catch (err) {
+      res.status(200).json({ message: "User registered successfully", status: 200, error: err });
+    }
+  }
+  console.log(req.user);
+  next();
 };
 
 const authenticateRegistration = (req, res, next) => {
@@ -135,11 +185,38 @@ const authenticateRegistration = (req, res, next) => {
   }
 };
 
+const authenticatePassReset = (req, res, next) => {
+  const token = req.cookies.authToken;
+  // console.log("this is the cookie that the authenticateRegistration receives.", token);
+  if (!token) {
+    return res.redirect(
+      "http://localhost:3000/login?message=Password+reset+failed+due+to+missing+or+invalid+token.+Please+try+again."
+    );
+  }
+
+  try {
+    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    console.log("this is from authenticate password reset");
+    console.log(decoded);
+    if (decoded.purpose !== "password_reset") {
+      return res.redirect(
+        "http://localhost:3000/login?message=Password+change+failed+due+to+wrong+purpose+of+token.+Please+try+again."
+      );
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.redirect(
+      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+    );
+  }
+};
+
 app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", authenticateLogin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
@@ -161,9 +238,26 @@ app.get("/register", authenticateRegistration, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
+app.get("/password_reset", authenticatePassReset, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "password_reset.html"));
+});
+
 app.get("/register-data", authenticateRegistration, (req, res) => {
+  console.log(req.user);
   const email = req.user.email;
+  console.log("this is to check if name is working in register-data get route", name);
   const name = req.user.name;
+  console.log("this is to check if name is working in register-data get route", name);
+  const rollno = email.split("@")[0].toUpperCase();
+  res.json({ name, email, rollno });
+});
+
+app.get("/password-change-deets", authenticatePassReset, (req, res) => {
+  // console.log(req.user);
+  const email = req.user.email;
+  // console.log("this is to check if name is working in register-data get route", name);
+  const name = req.user.name;
+  // console.log("this is to check if name is working in register-data get route", name);
   const rollno = email.split("@")[0].toUpperCase();
   res.json({ name, email, rollno });
 });
@@ -181,12 +275,13 @@ app.get("/listSkills", async (req, res) => {
   }
 });
 
-app.get("/missingSkills", async (req, res) => {
+app.get("/missingSkills", authenticate, async (req, res) => {
   try {
+    const rollno = req.user.rollno;
     const skills = await User.aggregate([
       {
         $match: {
-          rollno: "24MX125",
+          rollno: rollno,
         },
       },
       {
@@ -215,10 +310,11 @@ app.get("/missingSkills", async (req, res) => {
 
 app.get("/userSkills", authenticate, async (req, res) => {
   try {
+    const rollno = req.user.rollno;
     const skills = await User.aggregate([
       {
         $match: {
-          rollno: req.user.rollno,
+          rollno: rollno,
         },
       },
       {
@@ -254,7 +350,9 @@ app.get("/userSkills", authenticate, async (req, res) => {
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-//below is the google redirect route stupid prettier wont show name when collapsed
+app.get("/auth/password_reset", passport.authenticate("google-password-reset", { scope: ["profile", "email"] }));
+
+//below is the google redirect route but stupid prettier wont show name when collapsed
 app.get(
   "/auth/callback",
   passport.authenticate("google", {
@@ -272,6 +370,29 @@ app.get(
         maxAge: 600000, // 10 minutes
       });
       res.redirect("/register");
+    }
+  }
+);
+
+//below is the google redirect route for password reseting
+app.get(
+  "/auth/password-reset-callback",
+  passport.authenticate("google-password-reset", {
+    session: false,
+    failureRedirect:
+      "/login?message=Attempt+to+reset+password+failed.Please+make+sure+you+are+using+PSG+tech+email+and+you+account+exits+and+try+again.",
+    failureMessage: true,
+  }),
+  (req, res) => {
+    if (req.user) {
+      // console.log("req.user is there and working", req.user);
+      res.cookie("authToken", req.user, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Lax",
+        maxAge: 600000, // 10 minutes
+      });
+      res.redirect("/password_reset");
     }
   }
 );
@@ -303,6 +424,30 @@ app.post("/register", authenticateRegistration, async (req, res) => {
   } catch (error) {
     console.error("Error registering user: ", error);
     res.status(500).json({ message: "Error registering user", status: 500 });
+  }
+});
+
+app.post("/password_reset", authenticatePassReset, async (req, res) => {
+  const { password } = req.body;
+  console.log(password);
+  const email = req.user.email;
+  const rollno = email.split("@")[0].toUpperCase();
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updatedUser = await User.findOneAndUpdate(
+      { rollno: rollno }, // Find user with this rollno
+      { password: hashedPassword }, // Update the password field
+      { new: true } // Return the updated user document
+    );
+    if (updatedUser) {
+      console.log("Password updated successfully for user:", rollno);
+    } else {
+      console.error("User not found with rollno:", rollno);
+    }
+    res.status(200).json({ message: "Password Change successfull", status: 200 });
+  } catch (error) {
+    console.error("Password change error1: ", error);
+    res.status(500).json({ message: "Password change error 2", status: 500 });
   }
 });
 
@@ -436,13 +581,13 @@ app.post("/addSkill", async (req, res) => {
 });
 
 app.post("/newRequest", authenticate, async (req, res) => {
-  const { subjectId, title, description } = req.body;
+  const { subjectId, title, description, phoneVisible } = req.body;
   const senderId = req.user.rollno;
   console.log(req.body);
   console.log(senderId, subjectId, title, description);
 
   try {
-    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description });
+    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description, phoneVisible: phoneVisible});
     await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
   } catch (error) {
@@ -484,6 +629,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           descr: "$req.description",
           status: "$req.status",
           requestId: "$req._id",
+          phoneVisible:"$req.phoneVisible",
         },
       },
       {
@@ -578,7 +724,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
         },
       },
       {
-        $unset: ["__v", "sk", "_id", "password", "phone", "skills"],
+        $unset: ["__v", "sk", "_id", "password", "skills"],
       },
       {
         $lookup: {
@@ -606,6 +752,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
           rejectedBy: "$matchingReq.rejectedBy",
+          phoneVisible:"$matchingReq.phoneVisible",
           timestamp: {
             $dateToString: {
               format: "%Y-%m-%d",
@@ -653,8 +800,18 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       {
         $addFields: {
           senderName: "$senderName.name",
+          senderPhone:{
+            $cond:{
+              if:{ $eq :["$phoneVisible",true]},
+              then:"$senderName.phone",
+              else: null,
+            },
+          },
         },
       },
+      {
+        $unset:["SenderName","__v","password"],
+      }
     ]);
     console.log(myReqs);
     res.json(myReqs);

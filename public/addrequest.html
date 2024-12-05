@@ -44,6 +44,8 @@
           placeholder="Enter your description..."
           required
         ></textarea>
+        <label>Show Phone Number :</label>
+        <input type="checkbox" id="phoneVisible" name="phoneVisible">
         <div class="error-box" id="error-box">
           <span id="error1">Request registered successfully</span>
         </div>
@@ -79,6 +81,7 @@
         const topic = document.getElementById("topic").value;
         const description = document.getElementById("description").value;
         const title = document.getElementById("title").value;
+        const phoneVisible = document.getElementById("phoneVisible").checked;
         // const senderId = "24MX120";
 
         const response = await fetch("http://localhost:3000/newRequest", {
@@ -86,7 +89,7 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ subjectId: topic, title: title, description: description }),
+          body: JSON.stringify({ subjectId: topic, title: title, description: description, phoneVisible:phoneVisible }),
         });
 
         const data = await response.json();
