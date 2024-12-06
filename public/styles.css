@@ -453,7 +453,6 @@ textarea {
   }
 }
 
-/* Apply both animations */
 .slide-out1 {
   animation: slideOut1 1s forwards, bgColorChange1 0.3s forwards; /* Different durations */
 }
@@ -551,4 +550,27 @@ input:checked + .slider:before {
   margin: 0;
   padding: 0;
   width: 100%;
+}
+@keyframes deleteOutgoing {
+  0% {
+    scale: 1; /* Start at its full height */
+    opacity: 1; /* Fully visible */
+  }
+
+  100% {
+    scale: 0.01; /* Fully collapsed */
+    opacity: 0; /* Fully invisible */
+  }
+}
+@keyframes deleteOutgoingbg {
+  0% {
+    background-color: #e6e3e7;
+  }
+  100% {
+    background-color: rgb(162, 14, 14);
+  }
+}
+.delete-slide {
+  animation: deleteOutgoing 1s forwards, deleteOutgoingbg 0.1s forwards; /* Different durations */
+  overflow: hidden;
 }
