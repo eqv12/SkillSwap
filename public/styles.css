@@ -432,3 +432,9 @@ textarea {
   margin-left: 40px;
   display: inline;
 }
+
+#reqs-list {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}

@@ -602,6 +602,9 @@ app.get("/outgoingRequests", authenticate, (req, res) => {
 
 app.get("/api/outgoingRequests", authenticate, async (req, res) => {
   const requesterId = req.user.rollno;
+  const requestStatus = req.query.status || 'Pending';
+  console.log(requestStatus)
+
   try {
     const myReqs = await User.aggregate([
       {
@@ -620,8 +623,9 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       {
         $match: {
           rollno: requesterId,
-        },
+        }
       },
+      
       {
         $addFields: {
           subjId: "$req.subjectId",
@@ -652,6 +656,11 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       },
       {
         $unset: ["req", "sk", "password", "__v", "subjId", "phone", "skills"],
+      },
+      {
+        $match: {
+          status: requestStatus,
+        }
       },
     ]);
     res.json(myReqs);

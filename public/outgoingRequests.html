@@ -22,42 +22,68 @@
       </header>
     </div>
 
-    <!-- Section for displaying requests -->
-    <div class="requests-container">
-      <div id="requests-list">
-        <!-- Requests will be injected here -->
+
+    <!-- <div id="reqs-list" class="request-container">
+      <h2>Outgoing Requests</h2>
+    </div> -->
+
+    <div id="req-wrapper" class="request-container">
+      <h2>Outgoing Requests</h2>
+      <div id="toggleContainer">
+        <button id="showPending">Pending Requests</button>
+        <button id="showAccepted">Accepted Requests</button>
+
+        <div id="filterContainer">
+          <!-- <label for="subjectFilter">Filter: </label> -->
+          <select id="subjectFilter" onchange="filterRequestsBySubject()">
+            <option value="">--Select Subject--</option>
+            <!-- Dropdown options will be populated here dynamically -->
+          </select>
+        </div>
+      </div>
+
+      
+      <div  id="reqs-list" class="request-container" >
+      
       </div>
     </div>
 
-    <div id="reqs-list" class="request-container">
-      <h2>Outgoing Requests</h2>
-      <!-- <div id="req" class="individual-request-container">
-        <label id="topicLabel">Topic: </label><br>
-        <label id="descrLabel">Description: </label><br>
-        <label id="statusLabel">Status: </label>
-    </div> -->
-    </div>
 
     <script>
       // Fetch the list of outgoing requests from the server
+      let status = 'Pending';
       async function fetchOutgoingRequests() {
         try {
-          const response = await fetch("http://localhost:3000/api/outgoingRequests");
+          const response = await fetch(`http://localhost:3000/api/outgoingRequests?status=${status}`);
           const requestsData = await response.json();
           console.log(requestsData);
 
+          const subjects = new Set();
+          requestsData.forEach(request => {
+            subjects.add(request.subjName);
+          })
+
+          const uniqueSubjArr = [...subjects]
+          console.log("&&&&", uniqueSubjArr)
+          populateFilterDropdown(uniqueSubjArr)
+
           // Get the container where requests will be displayed
           const requestsList = document.getElementById("reqs-list");
+          requestsList.innerHTML = '';
 
           // Check if there are requests
           if (requestsData.length === 0) {
+            console.log("huh")
             requestsList.innerHTML = "<p>No outgoing requests available.</p>";
           } else {
+            console.log("test")
             // Loop through each request and create HTML elements
             requestsData.forEach((request) => {
               // document.getElementById("topicLabel").innerHTML += request.subjName
               const reqDiv = document.createElement("div");
               reqDiv.classList.add("individual-request-container");
+
+              reqDiv.setAttribute("data-subject", request.subjName);
 
               reqDiv.innerHTML = `<label><strong>Topic:</strong> ${request.subjName}</label><br>
              <label><strong>Title:</strong> ${request.title}</label><br>
@@ -74,7 +100,7 @@
           }
         } catch (error) {
           console.error("Error fetching requests:", error);
-          const requestsList = document.getElementById("requests-list");
+          const requestsList = document.getElementById("reqs-list");
           requestsList.innerHTML = "<p>Failed to load requests. Please try again later.</p>";
         }
       }
@@ -110,6 +136,61 @@
           }
         }
       });
+
+      
+      function populateFilterDropdown(subjects){
+        const filterDropdown = document.getElementById('subjectFilter');
+        filterDropdown.innerHTML = '';
+        const defaultOpt = document.createElement("option");
+        defaultOpt.value = '--Select Subject--';
+        defaultOpt.textContent = '--Select Subject--';
+        filterDropdown.appendChild(defaultOpt);
+
+
+        subjects.forEach(subject => {
+          const option = document.createElement("option");
+          option.value = subject;
+          option.textContent = subject;
+          filterDropdown.appendChild(option);
+        })
+      }
+
+      function filterBySubject(selectedSubj){
+        const outRequestslist = document.getElementById("reqs-list");
+        const allRequests = outRequestslist.getElementsByClassName("individual-request-container");
+        console.log("$$$$", allRequests)
+
+        Array.from(allRequests).forEach(reqDiv => {
+          const reqSubj = reqDiv.getAttribute("data-subject");
+          if (selectedSubj === '--Select Subject--' || reqSubj == selectedSubj){
+            reqDiv.style.display = 'block';
+          }
+          else {
+            reqDiv.style.display = 'none';
+          }
+        })
+      }
+
+      document.getElementById("subjectFilter").addEventListener("change", function(event){
+        const selectedSubj = event.target.value;
+        filterBySubject(selectedSubj);
+      });
+
+      document.getElementById("showAccepted").addEventListener("click", function() {
+        document.getElementById("showAccepted").style.backgroundColor = "green";
+        document.getElementById("showPending").style.backgroundColor = "#d087e4";
+        status = "Accepted";
+        fetchOutgoingRequests();
+      })
+
+      document.getElementById("showPending").addEventListener("click", function() {
+        document.getElementById("showAccepted").style.backgroundColor = "#d087e4";
+        document.getElementById("showPending").style.backgroundColor = "green";
+        status = "Pending";
+        fetchOutgoingRequests();
+      })
+
+
       async function logout() {
         try {
           const response = await fetch("/logout", {
