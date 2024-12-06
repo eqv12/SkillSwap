@@ -546,3 +546,9 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+#reqs-list {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
