@@ -145,17 +145,21 @@ const authenticateLogin = (req, res, next) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
-      if (decoded && decoded.purpose === "access") {
+      if (decoded.purpose === "access") {
         return res.redirect("http://localhost:3000/outgoingRequests");
       }
       req.user = decoded;
       console.log("this is from authenticate login");
+      console.log(req.user);
+      next();
     } catch (err) {
-      res.status(200).json({ message: "User registered successfully", status: 200, error: err });
+      // res.status(500).json({ message: "User not verified successfully", status: 500, error: err });
+      console.log(req.user);
+      next();
     }
+  } else {
+    next();
   }
-  console.log(req.user);
-  next();
 };
 
 const authenticateRegistration = (req, res, next) => {
@@ -398,7 +402,7 @@ app.get(
 );
 
 app.post("/register", authenticateRegistration, async (req, res) => {
-  const { password } = req.body;
+  const { password, phone } = req.body;
   console.log(password);
   const email = req.user.email;
   const rollno = email.split("@")[0].toUpperCase();
@@ -418,7 +422,7 @@ app.post("/register", authenticateRegistration, async (req, res) => {
   // res.status(200).json({ message: "Check your email to verify your account." });
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ rollno: rollno, name: name, password: hashedPassword });
+    const newUser = new User({ rollno: rollno, name: name, password: hashedPassword, phone: phone });
     await newUser.save();
     res.status(200).json({ message: "User registered successfully", status: 200 });
   } catch (error) {
@@ -559,6 +563,20 @@ app.post("/removeUserSkill", authenticate, async (req, res) => {
   }
 });
 
+app.post("/displayPhone", authenticate, async (req, res) => {
+  const { display } = req.body;
+  const userid = req.user.rollno;
+  console.log(display);
+  try {
+    const toggle = await User.findOneAndUpdate({ rollno: userid }, { $set: { phoneVisible: display } }, { new: true });
+    // console.log(toggle);
+    res.status(200).json(toggle);
+  } catch (error) {
+    console.error("Error updating skills:", error);
+    res.status(500).json({ message: "Error updating skills", error: error.message });
+  }
+});
+
 app.post("/addSkill", async (req, res) => {
   const { skill } = req.body;
   console.log(req.body);
@@ -581,13 +599,18 @@ app.post("/addSkill", async (req, res) => {
 });
 
 app.post("/newRequest", authenticate, async (req, res) => {
-  const { subjectId, title, description, phoneVisible } = req.body;
+  const { subjectId, title, description } = req.body;
   const senderId = req.user.rollno;
   console.log(req.body);
   console.log(senderId, subjectId, title, description);
 
   try {
-    const newRequest = new Request({ senderId: senderId, subjectId: subjectId, title: title, description: description, phoneVisible: phoneVisible});
+    const newRequest = new Request({
+      senderId: senderId,
+      subjectId: subjectId,
+      title: title,
+      description: description,
+    });
     await newRequest.save();
     res.status(201).json({ message: "Request sent successfully", status: 201 });
   } catch (error) {
@@ -629,7 +652,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           descr: "$req.description",
           status: "$req.status",
           requestId: "$req._id",
-          phoneVisible:"$req.phoneVisible",
+          phoneVisible: "$req.phoneVisible",
         },
       },
       {
@@ -684,8 +707,8 @@ app.get("/incomingRequests", authenticate, (req, res) => {
 
 app.get("/api/incomingRequests", authenticate, async (req, res) => {
   const receiverId = req.user.rollno;
-  const requestStatus = req.query.status || 'Pending';
-  console.log(requestStatus)
+  const requestStatus = req.query.status || "Pending";
+  console.log(requestStatus);
 
   console.log(receiverId);
   try {
@@ -752,7 +775,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
           rejectedBy: "$matchingReq.rejectedBy",
-          phoneVisible:"$matchingReq.phoneVisible",
+          phoneVisible: "$matchingReq.phoneVisible",
           timestamp: {
             $dateToString: {
               format: "%Y-%m-%d",
@@ -800,18 +823,18 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       {
         $addFields: {
           senderName: "$senderName.name",
-          senderPhone:{
-            $cond:{
-              if:{ $eq :["$phoneVisible",true]},
-              then:"$senderName.phone",
+          senderPhone: {
+            $cond: {
+              if: { $eq: ["$phoneVisible", true] },
+              then: "$senderName.phone",
               else: null,
             },
           },
         },
       },
       {
-        $unset:["SenderName","__v","password"],
-      }
+        $unset: ["SenderName", "__v", "password"],
+      },
     ]);
     console.log(myReqs);
     res.json(myReqs);

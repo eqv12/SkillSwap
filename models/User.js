@@ -6,6 +6,7 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   password: { type: String, required: true },
   phone: { type: String, defaut: "123" },
+  phoneVisible: { type: Boolean, default: false },
   skills: [{ type: Number, ref: "Skill" }],
 });
 

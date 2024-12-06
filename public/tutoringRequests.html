@@ -22,7 +22,6 @@
       </header>
     </div>
 
-    
     <div id="req-wrapper" class="request-container">
       <h2>Incoming Requests</h2>
       <div id="toggleContainer">
@@ -38,34 +37,29 @@
         </div>
       </div>
 
-      
-      <div id="inReq-list" >
-      
-      </div>
+      <div id="inReq-list"></div>
     </div>
 
     <script>
-      let status = 'Pending';
+      let status = "Pending";
       async function fetchIncomingRequests() {
         try {
-          
           const response = await fetch(`http://localhost:3000/api/incomingRequests?status=${status}`);
           const inRequestsData = await response.json();
           console.log(inRequestsData);
 
           const subjects = new Set();
-          inRequestsData.forEach(request => {
+          inRequestsData.forEach((request) => {
             subjects.add(request.skillName);
-          })
+          });
 
-          const uniqueSubjArr = [...subjects]
-          console.log("&&&&", uniqueSubjArr)
-          populateFilterDropdown(uniqueSubjArr)
-
+          const uniqueSubjArr = [...subjects];
+          console.log("&&&&", uniqueSubjArr);
+          populateFilterDropdown(uniqueSubjArr);
 
           // <label><strong>Request Date:</strong> ${reqTime}</label><br>
           const inRequestslist = document.getElementById("inReq-list");
-          inRequestslist.innerHTML = '';
+          inRequestslist.innerHTML = "";
 
           if (inRequestsData.length === 0) {
             inRequestslist.innerHTML = "<p>No Incoming Requests available. </p>";
@@ -82,16 +76,20 @@
               <label><strong>Description:</strong> ${request.descr}</label><br>
               <label><strong>Status:</strong> ${request.status}</label><br>
               <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
-              ${request.phoneVisible ?`<label><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>`:""}
+              ${request.phoneVisible ? `<label><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>` : ""}
               <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
                
-              <button class="acceptBtn tutor-btns" onclick="acceptRequest('${request.reqId}', this)">Accept</button>
-              <button class="rejectBtn tutor-btns" onclick="rejectRequest('${request.reqId}', this)">Reject</button>`;
+              <button class="acceptBtn tutor-btns" onclick="acceptRequest('${
+                request.reqId
+              }', this, this.parentNode)">Accept</button>
+              <button class="rejectBtn tutor-btns" onclick="rejectRequest('${
+                request.reqId
+              }', this,this.parentNode)">Reject</button>`;
 
               console.log(request.descr, request.status);
-              if (request.status == 'Accepted'){
+              if (request.status == "Accepted") {
                 let tutorBtns = inReqdiv.getElementsByClassName("tutor-btns");
-                Array.from(tutorBtns).forEach(btn => btn.style.display = 'none');
+                Array.from(tutorBtns).forEach((btn) => (btn.style.display = "none"));
               }
 
               inRequestslist.appendChild(inReqdiv);
@@ -106,7 +104,7 @@
 
       window.onload = fetchIncomingRequests;
 
-      async function acceptRequest(reqId, button) {
+      async function acceptRequest(reqId, button, div) {
         try {
           const response = await fetch(`/api/request/${reqId}/accept`, {
             method: "POST",
@@ -114,70 +112,73 @@
           });
 
           if (response.ok) {
-            button.disabled = true;
-            const rejectBtn = button.nextElementSibling;
-            rejectBtn.disabled = true;
+            div.classList.add("slide-out1");
+            div.addEventListener("animationend", () => {
+              div.remove();
+            });
+
+            // button.disabled = true;
+            // const rejectBtn = button.nextElementSibling;
+            // rejectBtn.disabled = true;
 
             // const requestDiv = button.parentElement;
-            rejectBtn.insertAdjacentHTML("afterend", "    Request accepted");
+            // rejectBtn.insertAdjacentHTML("afterend", "    Request accepted");
           }
         } catch (error) {
           console.error("Error accepting request: ", error);
         }
       }
 
-      function populateFilterDropdown(subjects){
-        const filterDropdown = document.getElementById('subjectFilter');
-        filterDropdown.innerHTML = '';
+      function populateFilterDropdown(subjects) {
+        const filterDropdown = document.getElementById("subjectFilter");
+        filterDropdown.innerHTML = "";
         const defaultOpt = document.createElement("option");
-        defaultOpt.value = '--Select Subject--';
-        defaultOpt.textContent = '--Select Subject--';
+        defaultOpt.value = "--Select Subject--";
+        defaultOpt.textContent = "--Select Subject--";
         filterDropdown.appendChild(defaultOpt);
 
-
-        subjects.forEach(subject => {
+        subjects.forEach((subject) => {
           const option = document.createElement("option");
           option.value = subject;
           option.textContent = subject;
           filterDropdown.appendChild(option);
-        })
+        });
       }
 
-      function filterBySubject(selectedSubj){
+      function filterBySubject(selectedSubj) {
         const inRequestslist = document.getElementById("inReq-list");
         const allRequests = inRequestslist.getElementsByClassName("individual-request-container");
 
-        Array.from(allRequests).forEach(reqDiv => {
+        Array.from(allRequests).forEach((reqDiv) => {
           const reqSubj = reqDiv.getAttribute("data-subject");
-          if (selectedSubj === '--Select Subject--' || reqSubj == selectedSubj){
-            reqDiv.style.display = 'block';
+          if (selectedSubj === "--Select Subject--" || reqSubj == selectedSubj) {
+            reqDiv.style.display = "block";
+          } else {
+            reqDiv.style.display = "none";
           }
-          else {
-            reqDiv.style.display = 'none';
-          }
-        })
+        });
       }
 
-      document.getElementById("subjectFilter").addEventListener("change", function(event){
+      document.getElementById("subjectFilter").addEventListener("change", function (event) {
         const selectedSubj = event.target.value;
         filterBySubject(selectedSubj);
       });
 
-      document.getElementById("showAccepted").addEventListener("click", function() {
+      document.getElementById("showAccepted").addEventListener("click", function () {
         document.getElementById("showAccepted").style.backgroundColor = "green";
         document.getElementById("showPending").style.backgroundColor = "#d087e4";
         status = "Accepted";
         fetchIncomingRequests();
-      })
+      });
 
-      document.getElementById("showPending").addEventListener("click", function() {
+      document.getElementById("showPending").addEventListener("click", function () {
         document.getElementById("showAccepted").style.backgroundColor = "#d087e4";
         document.getElementById("showPending").style.backgroundColor = "green";
         status = "Pending";
         fetchIncomingRequests();
-      })
+      });
 
-      async function rejectRequest(reqId, button) {
+      async function rejectRequest(reqId, button, div) {
         try {
           // console.log("html")
           const response = await fetch("http://localhost:3000/api/request/reject", {
@@ -187,12 +188,16 @@
           });
           console.log(response);
           if (response.ok) {
-            button.disabled = true;
-            const acceptBtn = button.previousElementSibling;
-            acceptBtn.disabled = true;
+            div.classList.add("slide-out2");
+            div.addEventListener("animationend", () => {
+              div.remove();
+            });
+            // button.disabled = true;
+            // const acceptBtn = button.previousElementSibling;
+            // acceptBtn.disabled = true;
 
             // const requestDiv = button.parentElement;
-            button.insertAdjacentHTML("afterend", "    Request rejected");
+            //button.insertAdjacentHTML("afterend", "    Request rejected");
           }
         } catch (error) {
           console.error("Error accepting request: ", error);
