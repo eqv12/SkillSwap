@@ -74,18 +74,18 @@
             console.log("test");
             // Loop through each request and create HTML elements
             requestsData.reverse().forEach((request) => {
+              console.log(request);
               // document.getElementById("topicLabel").innerHTML += request.subjName
               const reqDiv = document.createElement("div");
               reqDiv.classList.add("individual-request-container");
 
               reqDiv.setAttribute("data-subject", request.subjName);
-
               reqDiv.innerHTML = `<label><strong>Topic:</strong> ${request.subjName}</label><br>
              <label><strong>Title:</strong> ${request.title}</label><br>
              <label><strong>Description:</strong> ${request.descr}</label><br>
-             <label><strong>Show Contact Number:</strong> ${request.phoneVisible ? "Yes" : "No"}</label><br>
              <label><strong>Status:</strong> ${request.status}</label><br>
-             <label><strong>Accepted By:</strong>  &lt;to be filled&gt;</label> <br>
+             ${request.tutorName ? `<label class="dispPh"><strong>Accepted By:</strong> ${request.tutorName}</label><br>` : ""}
+             ${request.tutorPhone ? `<label class="dispPh"><strong>Tutor Phone No.:</strong> ${request.tutorPhone}</label><br>` : ""}
              <button class="delete-btn"
              data-request-id="${request.requestId}">Delete</button>`;
 

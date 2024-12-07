@@ -76,7 +76,7 @@
               <label><strong>Description:</strong> ${request.descr}</label><br>
               <label><strong>Status:</strong> ${request.status}</label><br>
               <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
-              ${request.phoneVisible ? `<label><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>` : ""}
+              ${request.senderPhone ? `<label class="dispPh"><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>` : ""}
               <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
                
               <button class="acceptBtn tutor-btns" onclick="acceptRequest('${
@@ -92,8 +92,15 @@
                 Array.from(tutorBtns).forEach((btn) => (btn.style.display = "none"));
               }
 
+              // if (request.status == "Pending") {
+              //   document.getElementsByClassName("dispPh")[-1].style.display = "none";
+              // }
+
               inRequestslist.appendChild(inReqdiv);
-            });
+            }
+
+            
+          );
           }
         } catch (error) {
           console.error("Error in fetching requests: ", error);

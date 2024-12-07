@@ -18,6 +18,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 // import { sendEmail } from './mailer.js';
 import crypto from "crypto";
 import { title } from "process";
+import { truncate } from "fs";
 
 const pendingUsers = {};
 
@@ -657,6 +658,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           status: "$req.status",
           requestId: "$req._id",
           phoneVisible: "$req.phoneVisible",
+          tutorId: "$req.tutorId"
         },
       },
       {
@@ -685,6 +687,38 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           status: requestStatus,
         },
       },
+      {
+        $lookup: {
+           		from: "users",
+              localField: "tutorId",
+              foreignField: "rollno",
+              as: "tutorDetails",
+        }
+      },
+      {
+        $unwind: {
+          path: "$tutorDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          tutorName: "$tutorDetails.name",
+          tutorPhVisible: "$tutorDetails.phoneVisible",
+          tutorPhone: {
+            $cond: {
+              if: {
+                $and: [{ $eq: [ "$tutorDetails.phoneVisible", true ] }, { $eq: [ "$status", "Accepted" ] }] 
+                },
+              then: "$tutorDetails.phone",
+              else: null
+        		}
+      		}
+        }
+      },
+      {
+        $unset: 'tutorDetails'
+      }
     ]);
     res.json(myReqs);
     // res.render('outgoingRequests', {
@@ -771,11 +805,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           path: "$matchingReq",
         },
       },
-      //   {
-      //     $addFields: {
-      //       matchingReq: {$arrayElemAt: ["$matchingReq", 0]}
-      //     }
-      //   },
+
       {
         $addFields: {
           reqId: "$matchingReq._id",
@@ -795,24 +825,28 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       },
       {
         $match: {
-          status: requestStatus,
-        },
-      },
-      {
-        $unwind: {
-          path: "$rejectedBy",
-          preserveNullAndEmptyArrays: true,
+          $and: [{status: requestStatus}, 
+          {
+        	$expr: {
+          $and: [
+            { $isArray: "$rejectedBy" },
+            { $not: { $in: ["$rollno", "$rejectedBy"] } }
+              ]
+            }
+          }
+        ]
         },
       },
       {
         $unset: "matchingReq",
       },
+
       {
         $match: {
           $expr: {
-            $and: [{ $ne: ["$rollno", "$senderId"] }, { $ne: ["$rollno", "$rejectedBy"] }],
-          },
-        },
+            $ne: ["$rollno", "$senderId"]
+        	}
+        }
       },
 
       {
@@ -820,29 +854,30 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           from: "users",
           localField: "senderId",
           foreignField: "rollno",
-          as: "senderName",
+          as: "senderObj",
         },
       },
 
       {
         $addFields: {
-          senderName: { $arrayElemAt: ["$senderName", 0] },
+          senderObj: { $arrayElemAt: ["$senderObj", 0] },
         },
       },
       {
         $addFields: {
-          senderName: "$senderName.name",
+          senderName: "$senderObj.name",
+          senderPhVisib: "$senderObj.phoneVisible",
           senderPhone: {
             $cond: {
-              if: { $eq: ["$phoneVisible", true] },
-              then: "$senderName.phone",
+              if: { $and: [{ $eq: ["$senderObj.phoneVisible", true] }, { $eq: ["$status", "Accepted"] }] },
+              then: "$senderObj.phone",
               else: null,
             },
           },
         },
       },
       {
-        $unset: ["SenderName", "__v", "password"],
+        $unset: ["senderObj", "__v", "password"],
       },
       {
         $sort: {
