@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .flip-container {
+        display: flex;
+        background-color: #d3bdf0;
+        align-items: center;
+        justify-content: center;
+        height: 97.6vh;
+      }
+
+      .flipping-element {
+        /* border: solid 5px black; */
+        position: absolute;
+        top: 20vh;
+        left: 6vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 90vw;
+        height: 38vh;
+        overflow: hidden;
+        font-size: 40vh;
+        font-family: "Jersey 25", sans-serif;
+      }
+      .flipping-element img {
+        height: 40vh;
+      }
+
+      .navbar {
+        width: 100%;
+        background-color: #2b003800;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navList {
+        /* display: flex; */
+        justify-content: flex-end; /* Space out items */
+        align-items: center;
+        padding-left: 38%;
+      }
+
+      .navList a {
+        color: white;
+        text-decoration: none;
+        font-size: 20px;
+        padding: 15px;
+        margin-left: 60px;
+      }
+
+      .navList a:hover {
+        border-radius: 5px;
+        background-color: #cfcfcf;
+        color: black;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #d3bdf0;
+      }
+      /* Sticky Header */
+      header {
+        background-color: #2b0038;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 30px;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        opacity: 0;
+        height: 60px;
+      }
+
+      .logo {
+        font-family: "Jersey 25", sans-serif;
+        font-size: 24px;
+        flex-shrink: 0; /* Prevents the logo from shrinking */
+      }
+
+      @keyframes navBarOp {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .navBarOpacity {
+        animation: navBarOp 1s ease-out;
+      }
+
+      @keyframes dispSkillShare1 {
+        0% {
+          position: absolute;
+          left: 6vw;
+          top: 20vh;
+          font-size: 40vh;
+          color: black;
+          z-index: 0;
+        }
+        100% {
+          position: absolute;
+          left: -39.5vw;
+          top: -15vh;
+          font-size: 24px;
+          color: white;
+          z-index: 1001;
+        }
+      }
+
+      [class*="dispSkillShare"] {
+        animation: dispSkillShare1 1s ease-out;
+      }
+
+      @-webkit-keyframes flip-horizontal-bottom1 {
+        0% {
+          -webkit-transform: rotateX(0);
+          transform: rotateX(0);
+        }
+        100% {
+          -webkit-transform: rotateX(-180deg);
+          transform: rotateX(-180deg);
+        }
+      }
+      @keyframes flip-horizontal-bottom1 {
+        0% {
+          -webkit-transform: rotateX(0);
+          transform: rotateX(0);
+        }
+        100% {
+          -webkit-transform: rotateX(-180deg);
+          transform: rotateX(-180deg);
+        }
+      }
+      @-webkit-keyframes flip-horizontal-bottom2 {
+        0% {
+          -webkit-transform: rotateX(-180deg);
+          transform: rotateX(-180deg);
+        }
+        100% {
+          -webkit-transform: rotateX(0);
+          transform: rotateX(0);
+        }
+      }
+      @keyframes flip-horizontal-bottom2 {
+        0% {
+          -webkit-transform: rotateX(-180deg);
+          transform: rotateX(-180deg);
+        }
+        100% {
+          -webkit-transform: rotateX(0);
+          transform: rotateX(0);
+        }
+      }
+      [class$="odd"] {
+        -webkit-animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+        animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+      }
+      [class$="even"] {
+        -webkit-animation: flip-horizontal-bottom2 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+        animation: flip-horizontal-bottom2 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <header id="temp">
+        <span class="logo"></span>
+        <nav class="navList">
+          <a href="" class="register-link">Register</a>
+        </nav>
+      </header>
+    </div>
+    <div class="flip-container">
+      <div class="flipping-element">
+        <img src="./resources/book.svg" alt="Profile Icon" />
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        const flipContainer = document.querySelector(".flipping-element");
+        const navibar = document.getElementById("temp");
+        const flipButton = document.querySelector("#trigger-flip");
+
+        // Array of icons to cycle through
+        const icons = [
+          "book.svg",
+          "computer.svg",
+          "rank.svg",
+          "plane.svg",
+          "cv.svg",
+          "chat.svg",
+          "folder.svg",
+          "goal.svg",
+          "list.svg",
+          "highlight.svg",
+          "date.svg",
+          "pen.svg",
+        ];
+        let currentIndex = 0; // Tracks the current icon index
+        let flipCounter = 1; // Counter for unique class name
+
+        let flipInterval = setInterval(() => {
+          let newClass = `${flipCounter}odd`;
+          if (flipCounter % 2 !== 0) {
+            newClass = `${flipCounter}odd`;
+          } else if (flipCounter % 2 === 0) {
+            newClass = `${flipCounter}even`;
+          }
+          flipCounter++;
+          flipContainer.classList.add(newClass);
+          setTimeout(() => {
+            currentIndex = (currentIndex + 1) % icons.length;
+            if (flipCounter < 13) {
+              flipContainer.innerHTML = `<img src="./resources/${icons[currentIndex]}" alt="Icon">`;
+            } else if (flipCounter == 13) {
+              flipContainer.innerHTML = `<p>SkillSwap</p>`;
+            }
+          }, 200);
+          if (flipCounter == 13) {
+            clearInterval(flipInterval);
+          }
+        }, 400);
+        // Add the class after the flipping animation is fully completed
+        // Add the class after the flipping animation is fully completed
+        // Add the class after the flipping animation is fully completed
+        setTimeout(() => {
+          flipContainer.classList.add("dispSkillShare");
+          navibar.classList.add("navBarOpacity");
+
+          // Listen for when the dispSkillShare animation ends
+          flipContainer.addEventListener(
+            "animationend",
+            () => {
+              flipContainer.style.position = "absolute"; // Set the element's position relative to its normal position
+              flipContainer.style.fontSize = "24px"; // Set the font size to 24px
+              flipContainer.style.left = "-39.5vw"; // Move the element 10% of the viewport width to the left
+              flipContainer.style.top = "-15vh"; // Move the element 50% of the viewport height upwards
+              flipContainer.style.zIndex = "1001"; // Move the element 50% of the viewport height upwards
+              flipContainer.style.color = "white"; // Move the element 50% of the viewport height upwards
+              navibar.style.opacity = "1"; // Move the element 50% of the viewport height upwards
+              flipContainer.style.position = "fixed"; // Set the element's position relative to its normal position
+            },
+            { once: true }
+          ); // Ensures the listener runs only once
+        }, 400 * 14); // Delay = interval time (500ms) * number of flips (12)
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 400 * 14 + 1200);
+      };
+    </script>
+  </body>
+</html>
