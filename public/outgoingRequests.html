@@ -86,7 +86,13 @@
                   <!-- <div>Status: pending</div> -->
                   <div class="REQ-rollno-phone">
                     ${request.tutorName ? `<div class="REQ-rollno">${request.tutorName}</div>` : ""}
-                    ${request.tutorPhone ? `<div class="dispPh REQ-phone">${request.tutorPhone}</div>` : ""}
+                    ${
+                      request.tutorName
+                        ? request.tutorPhone
+                          ? `<div class="dispPh REQ-phone">${request.tutorPhone}</div>`
+                          : `<div class="dispPh REQ-phone">${request.tutorId.toLowerCase()}@psgtech.ac.in</div>`
+                        : ""
+                    }
                   </div>
                 </div>
                 <div class="REQ-buttons-out">

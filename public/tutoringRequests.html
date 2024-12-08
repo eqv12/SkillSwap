@@ -60,7 +60,6 @@
           // <label><strong>Request Date:</strong> ${reqTime}</label><br>
           const inRequestslist = document.getElementById("inReq-list");
           inRequestslist.innerHTML = "";
-
           if (inRequestsData.length === 0) {
             inRequestslist.innerHTML = "<p>No Incoming Requests available. </p>";
           } else {
@@ -68,7 +67,7 @@
               const inReqdiv = document.createElement("div");
               inReqdiv.classList.add("individual-request-container1");
               inReqdiv.setAttribute("data-subject", request.skillName);
-
+              // console.log(request.status);
               inReqdiv.innerHTML = `<div class="REQ-reqest-button">
         <div id="requests-list" class="individual-request-container">
           <div class="REQ-title-skill">
@@ -81,10 +80,10 @@
           <div class="REQ-rollno-phone">
             <div class="REQ-rollno">${request.senderId}</div>
             ${
-              request.senderPhone
-                ? `
-            <div class="dispPh REQ-phone">${request.senderPhone}</div>
-            `
+              request.status == "Accepted"
+                ? request.senderPhone
+                  ? `<div class="dispPh REQ-phone">${request.senderPhone}</div>`
+                  : `<div class="dispPh REQ-phone">${request.senderId ? request.senderId.toLowerCase() : ""}@psgtech.ac.in</div>`
                 : ""
             }
           </div>
