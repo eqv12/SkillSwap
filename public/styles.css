@@ -260,7 +260,7 @@ textarea {
 .bigcont {
   display: flex;
   height: 91.5vh;
-  background-color: pink;
+  background-color: #d3bdf0;
   flex-wrap: wrap;
   align-content: flex-start;
 }
