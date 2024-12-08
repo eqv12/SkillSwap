@@ -100,7 +100,7 @@ header {
   align-items: center;
   justify-content: space-between;
 }
-.newreqButton1 {
+.newreqButton1, .newSubjButton1 {
   width: 45%;
   padding: 10px;
   border: none;
@@ -109,7 +109,7 @@ header {
   font-size: 20px;
   cursor: pointer;
 }
-.newreqButton2 {
+.newreqButton2, .newSubjButton2 {
   width: 45%;
   padding: 10px;
   border: none;

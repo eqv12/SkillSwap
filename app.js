@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { json, urlencoded } from "express";
 import { connect } from "mongoose";
 import { User } from "./models/User.js";
@@ -34,10 +35,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 connectDB();
-// const dbURI =
-//   "mongodb+srv://ramya:Wimmss123.@dev-skill-swap-cluster.efbjn.mongodb.net/skillSwap?retryWrites=true&w=majority&appName=dev-skill-swap-cluster";
 
 // connect(dbURI)
 //   .then(() => console.log("Connected to MongoDB"))
@@ -55,9 +54,9 @@ app.use(passport.initialize());
 passport.use(
   new GoogleStrategy(
     {
-      clientID: "1096054788985-31ei5n0viof5b4rscl7a6eb0mco4vilo.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: "http://localhost:3000/auth/callback",
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "/auth/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -72,7 +71,7 @@ passport.use(
         if (!email.endsWith("@psgtech.ac.in")) {
           return done(null, false);
         }
-        const token = jwt.sign({ name, email, is_verified: true, purpose: "signup" }, "ramya-preethinthran-sharun", {
+        const token = jwt.sign({ name, email, is_verified: true, purpose: "signup" }, process.env.JWT_SECRET, {
           expiresIn: "10m",
         });
         console.log("google token successfuly passed to req.user", token);
@@ -88,9 +87,9 @@ passport.use(
   "google-password-reset",
   new GoogleStrategy(
     {
-      clientID: "1096054788985-31ei5n0viof5b4rscl7a6eb0mco4vilo.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: "http://localhost:3000/auth/password-reset-callback",
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "/auth/password-reset-callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -103,7 +102,7 @@ passport.use(
           return done(null, false);
         }
 
-        const token = jwt.sign({ name, rollno, email, purpose: "password_reset" }, "ramya-preethinthran-sharun", {
+        const token = jwt.sign({ name, rollno, email, purpose: "password_reset" }, process.env.JWT_SECRET, {
           expiresIn: "10m",
         });
         console.log("Password reset token generated", token);
@@ -118,26 +117,26 @@ passport.use(
 
 //these are the middlewares.
 const generateToken = (rollno, expiresIn = "15m") => {
-  return jwt.sign({ rollno, purpose: "access" }, "ramya-preethinthran-sharun", { expiresIn });
+  return jwt.sign({ rollno, purpose: "access"}, process.env.JWT_SECRET, { expiresIn });
 };
 //token authentication middleware
 const authenticate = (req, res, next) => {
   const token = req.cookies.authToken;
   if (!token) {
-    return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
+    return res.redirect("/login?message=Invalid+or+missing+token.+Please+login+again.");
   }
 
   try {
-    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.purpose !== "access") {
-      return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
+      return res.redirect("/login?message=Invalid+or+missing+token.+Please+login+again.");
     }
     req.user = decoded;
     console.log("this is from authenticate req.user");
     console.log(req.user);
     next();
   } catch (err) {
-    return res.redirect("http://localhost:3000/login?message=Invalid+or+missing+token.+Please+login+again.");
+    return res.redirect("/login?message=Invalid+or+missing+token.+Please+login+again.");
   }
 };
 
@@ -145,9 +144,9 @@ const authenticateLogin = (req, res, next) => {
   const token = req.cookies.authToken;
   if (token) {
     try {
-      const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (decoded.purpose === "access") {
-        return res.redirect("http://localhost:3000/outgoingRequests");
+        return res.redirect("/outgoingRequests");
       }
       req.user = decoded;
       console.log("this is from authenticate login");
@@ -168,24 +167,24 @@ const authenticateRegistration = (req, res, next) => {
   // console.log("this is the cookie that the authenticateRegistration receives.", token);
   if (!token) {
     return res.redirect(
-      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
     );
   }
 
   try {
-    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("this is from authenticateRegistration");
     console.log(decoded);
     if (decoded.purpose !== "signup") {
       return res.redirect(
-        "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+        "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
       );
     }
     req.user = decoded;
     next();
   } catch (err) {
     return res.redirect(
-      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
     );
   }
 };
@@ -195,24 +194,24 @@ const authenticatePassReset = (req, res, next) => {
   // console.log("this is the cookie that the authenticateRegistration receives.", token);
   if (!token) {
     return res.redirect(
-      "http://localhost:3000/login?message=Password+reset+failed+due+to+missing+or+invalid+token.+Please+try+again."
+      "/login?message=Password+reset+failed+due+to+missing+or+invalid+token.+Please+try+again."
     );
   }
 
   try {
-    const decoded = jwt.verify(token, "ramya-preethinthran-sharun");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("this is from authenticate password reset");
     console.log(decoded);
     if (decoded.purpose !== "password_reset") {
       return res.redirect(
-        "http://localhost:3000/login?message=Password+change+failed+due+to+wrong+purpose+of+token.+Please+try+again."
+        "/login?message=Password+change+failed+due+to+wrong+purpose+of+token.+Please+try+again."
       );
     }
     req.user = decoded;
     next();
   } catch (err) {
     return res.redirect(
-      "http://localhost:3000/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
+      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
     );
   }
 };
@@ -242,6 +241,32 @@ app.get("/dashboard-data", authenticate, async (req, res) => {
 app.get("/register", authenticateRegistration, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
 });
+
+app.get("/adminDashboard", authenticate, (req, res) => {
+  console.log("what??");
+  res.sendFile(path.join(__dirname, "public", "adminPage.html"));
+});
+
+app.post("/adminDashboard", authenticate, async (req, res) => {
+  const { subject } = req.body;
+  console.log(req.body);
+
+  try {
+    const nextId = await getNextSequence("skills");
+    console.log(nextId);
+    const newSubject = new Skill({  _id: nextId, skill: subject });
+    await newSubject.save();
+    res.status(201).json({ message: "Skill created successfully", status: 201 });
+  } catch (error) {
+    console.error("Error creating skill", error);
+    await Counter.findOneAndUpdate(
+      { id: "skills" },
+      { $inc: { seq: -1 } } // Decrement the counter
+    );
+    res.status(500).json({ message: "Error creating skill", status: 500 });
+  }
+});
+
 
 app.get("/password_reset", authenticatePassReset, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "password_reset.html"));
@@ -416,7 +441,7 @@ app.post("/register", authenticateRegistration, async (req, res) => {
   // const token = crypto.randomBytes(16).toString("hex");
   // pendingUsers[token] = { email, rollno, name, hashedPassword, createdAt: Date.now() };
 
-  // const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+  // const verificationLink = `/verify-email?token=${token}`;
 
   // console.log(`Verification email sent to ${email} with link: ${verificationLink}`);
 
@@ -496,30 +521,31 @@ app.get("/verify-email", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  console.log(req.body);
-  const { rollno, password, remember_me } = req.body;
-  try {
-    const user = await User.findOne({ rollno: rollno });
+      console.log(req.body);
+      const { rollno, password, remember_me } = req.body;
+      const isAdmin = rollno === "admin"; 
+      try {
+        const user = await User.findOne({ rollno: rollno });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const tokenExpiry = remember_me ? "7d" : "15m";
-      const token = generateToken(rollno, tokenExpiry);
-      console.log("This is to check the cookie", token); //vulnerabiity do not keep this in the final code if kept ramya's responsibility.
-      res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "Strict",
-        maxAge: remember_me ? 7 * 24 * 60 * 60 * 1000 : null,
-      });
+        if (user && (await bcrypt.compare(password, user.password))) {
+          const tokenExpiry = remember_me ? "7d" : "15m";
+          const token = generateToken(rollno, tokenExpiry);
+          console.log("This is to check the cookie", token); //vulnerabiity do not keep this in the final code if kept ramya's responsibility.
+          res.cookie("authToken", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "Strict",
+            maxAge: remember_me ? 7 * 24 * 60 * 60 * 1000 : null,
+          });
 
-      res.status(200).json({ message: "User credentials authenticated", status: 200 });
-    } else {
-      res.status(401).json({ message: "Bad credentials", status: 401 });
-    }
-  } catch (error) {
-    console.error("Error during login: ", error);
-    res.status(500).send("Error logging in");
-  }
+          res.status(200).json({ message: "User credentials authenticated", status: 200, isAdmin: isAdmin });
+        } else {
+          res.status(401).json({ message: "Bad credentials", status: 401 });
+        }
+      } catch (error) {
+        console.error("Error during login: ", error);
+        res.status(500).send("Error logging in");
+      }
 });
 
 app.post("/logout", (req, res) => {
@@ -943,6 +969,8 @@ app.post("/api/request/reject", authenticate, async (req, res) => {
     res.status(500).send({ error: "Internal Sever Error" });
   }
 });
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

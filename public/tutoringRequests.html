@@ -11,10 +11,10 @@
       <header>
         <span class="logo">SkillSwap</span>
         <nav class="navList">
-          <a href="http://localhost:3000/outgoingRequests" class="register-link">Requests</a>
-          <a href="http://localhost:3000/incomingRequests" class="register-link">Tutoring</a>
-          <a href="http://localhost:3000/newRequest" class="register-link">Post</a>
-          <a href="http://localhost:3000/dashboard" class="register-link">Dashboard</a>
+          <a href="/outgoingRequests" class="register-link">Requests</a>
+          <a href="/incomingRequests" class="register-link">Tutoring</a>
+          <a href="/newRequest" class="register-link">Post</a>
+          <a href="/dashboard" class="register-link">Dashboard</a>
         </nav>
         <div class="right" onclick="logout()">
           <img src="./resources/logouticon.svg" alt="logout Icon" />
@@ -44,7 +44,7 @@
       let status = "Pending";
       async function fetchIncomingRequests() {
         try {
-          const response = await fetch(`http://localhost:3000/api/incomingRequests?status=${status}`);
+          const response = await fetch(`/api/incomingRequests?status=${status}`);
           const inRequestsData = await response.json();
           console.log(inRequestsData);
 
@@ -188,7 +188,7 @@
       async function rejectRequest(reqId, button, div) {
         try {
           // console.log("html")
-          const response = await fetch("http://localhost:3000/api/request/reject", {
+          const response = await fetch("/api/request/reject", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ reqId: reqId }),
@@ -219,7 +219,7 @@
           });
           console.log(response);
           if (response.status === 200) {
-            window.location.href = "http://localhost:3000/login";
+            window.location.href = "/login";
           } else {
             console.error("Logout failed:", response.statusText);
           }

@@ -10,83 +10,50 @@
     <div class="navbar">
       <header>
         <span class="logo">SkillSwap</span>
-        <nav class="navList">
+        <!-- <nav class="navList">
           <a href="/outgoingRequests" class="register-link">Requests</a>
           <a href="/incomingRequests" class="register-link">Tutoring</a>
           <a href="/newRequest" class="register-link">Post</a>
           <a href="/dashboard" class="register-link">Dashboard</a>
-        </nav>
+        </nav> -->
         <div class="right" onclick="logout()">
           <img src="./resources/logouticon.svg" alt="logout Icon" />
         </div>
       </header>
     </div>
     <div class="form-container">
-      <h2>Posting Request</h2>
+      <h2>Add subject to database</h2>
       <form id="reqForm">
         <!-- <label for="title">Title</label>
         <input type="text" id="title" name="title" placeholder="Enter request title" class="input-field" required /> -->
-        <label for="topic">Topic</label>
-        <div class="add-topic">
-          <select id="topic" name="topic" class="input-field" required>
-            <option value="">Select a topic</option>
-          </select>
-          <!-- <button type="button" class="input-field" id="addsubject">+</button> -->
-        </div>
+        
         <div>
-          <label for="title">Enter your Title: </label><input type="text" id="title" name="title" class="input-field" required />
+          <label for="subject">Enter subject to add in database: </label>
+          <input type="text" id="subject" name="subject" class="input-field" required />
         </div>
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          class="input-field"
-          placeholder="Enter your description..."
-          required
-        ></textarea>
+       
         <div class="error-box" id="error-box">
           <span id="error1">Request registered successfully</span>
         </div>
         <div class="buttons">
-          <button type="reset" class="newreqButton1" id="reset1">Discard</button>
-          <button type="submit" class="newreqButton2" id="submit">Save</button>
+
+          <button type="submit" class="newSubjButton2" id="submit">Save</button>
         </div>
       </form>
     </div>
     <script>
-      async function listData() {
-        try {
-          const subListJson = await fetch("/listSkills");
-          const subListData = await subListJson.json();
-          console.log(subListData);
-          const topicDropdown = document.getElementById("topic");
-          subListData.forEach((skill) => {
-            const option = document.createElement("option");
-            option.value = skill._id;
-            option.textContent = skill.skill;
-            topicDropdown.appendChild(option);
-          });
-        } catch (error) {
-          console.error("Error:", error);
-        }
-      }
-      window.onload = listData;
-      const topic = document.getElementById("topic").value;
+
       document.getElementById("submit").addEventListener("click", async function (e) {
         e.preventDefault();
-        // alert("you have clicked me");
 
-        const topic = document.getElementById("topic").value;
-        const description = document.getElementById("description").value;
-        const title = document.getElementById("title").value;
-        // const senderId = "24MX120";
+        const subject = document.getElementById("subject").value;
 
-        const response = await fetch("/newRequest", {
+        const response = await fetch("/adminDashboard", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ subjectId: topic, title: title, description: description }),
+          body: JSON.stringify({ subject: subject}),
         });
 
         const data = await response.json();

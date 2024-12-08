@@ -11,10 +11,10 @@
       <header>
         <span class="logo">SkillSwap</span>
         <nav class="navList">
-          <a href="http://localhost:3000/outgoingRequests" class="register-link">Requests</a>
-          <a href="http://localhost:3000/incomingRequests" class="register-link">Tutoring</a>
-          <a href="http://localhost:3000/newRequest" class="register-link">Post</a>
-          <a href="http://localhost:3000/dashboard" class="register-link">Dashboard</a>
+          <a href="/outgoingRequests" class="register-link">Requests</a>
+          <a href="/incomingRequests" class="register-link">Tutoring</a>
+          <a href="/newRequest" class="register-link">Post</a>
+          <a href="/dashboard" class="register-link">Dashboard</a>
         </nav>
         <div class="right" onclick="logout()">
           <img src="./resources/logouticon.svg" alt="logout Icon" />
@@ -56,7 +56,7 @@
       document.getElementById("phoneDisplayCheck").addEventListener("change", async function(event){
         const phoneCheck = document.getElementById("phoneDisplayCheck");
         console.log(phoneCheck.checked);
-        const response = await fetch("http://localhost:3000/displayPhone", {
+        const response = await fetch("/displayPhone", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@
           document.getElementById("phoneDisplayCheck").checked=true;
           // alert("Login successful");
           // document.getElementById("error-box").style.opacity = "0";
-          // window.location.href = "http://localhost:3000/outgoingRequests";
+          // window.location.href = "/outgoingRequests";
         } else if (data.status == 401) {
           // alert("Wrong credentials");
           // document.getElementById("error-box").style.opacity = "1";
@@ -80,7 +80,7 @@
       })
       async function userdeets() {
         try {
-          const subListJson = await fetch("http://localhost:3000/dashboard-data");
+          const subListJson = await fetch("/dashboard-data");
           const userData = await subListJson.json();
           console.log(userData);
           const name = document.getElementById("name");
@@ -100,7 +100,7 @@
       window.onload = userdeets();
       async function listData() {
         try {
-          const subListJson = await fetch("http://localhost:3000/missingSkills");
+          const subListJson = await fetch("/missingSkills");
           const subListData = await subListJson.json();
           console.log(subListData);
           const topicDropdown = document.getElementById("topic");
@@ -117,7 +117,7 @@
       window.onload = listData();
       async function listUserSkill() {
         try {
-          const userSkillJson = await fetch("http://localhost:3000/userSkills");
+          const userSkillJson = await fetch("/userSkills");
           const UserSkills = await userSkillJson.json();
           console.log(UserSkills);
           UserSkills.forEach((skill) => {
@@ -137,7 +137,7 @@
               const skillId = closeButtonDiv.getAttribute("data-id"); // Get the skill ID
               console.log(`Skill with ID ${skillId} clicked.`); // Log for debugging
 
-              const response = await fetch("http://localhost:3000/removeUserSkill", {
+              const response = await fetch("/removeUserSkill", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -177,7 +177,7 @@
       document.getElementById("addSkillButton").addEventListener("click", async function (event) {
         const skillToAdd = document.getElementById("topic").value;
         console.log(skillToAdd);
-        const response = await fetch("http://localhost:3000/addUserSkill", {
+        const response = await fetch("/addUserSkill", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -205,7 +205,7 @@
             credentials: "include",
           });
           if (response.status === 200) {
-            window.location.href = "http://localhost:3000/login";
+            window.location.href = "/login";
           } else {
             console.error("Logout failed:", response.statusText);
           }

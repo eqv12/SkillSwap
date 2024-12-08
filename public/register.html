@@ -32,7 +32,7 @@
     <script type="module">
       window.onload = async () => {
         try {
-          const response = await fetch("http://localhost:3000/register-data");
+          const response = await fetch("/register-data");
           const data = await response.json();
 
           document.getElementById("email").value = data.email;
@@ -99,7 +99,7 @@
           return; // Stop further execution if passwords don't match
         }
 
-        const response = await fetch("http://localhost:3000/register", {
+        const response = await fetch("/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -112,7 +112,7 @@
         if (data.status == 200) {
           // alert("Login successful");
           document.getElementById("error-box").style.opacity = "0";
-          window.location.href = "http://localhost:3000/login?message=Registration+successful.+Login+to+use+the+app";
+          window.location.href = "/login?message=Registration+successful.+Login+to+use+the+app";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
           document.getElementById("error-box").style.opacity = "1";
@@ -131,7 +131,7 @@
           // document.addEventListener('visibilitychange', function() {
           // if (document.visibilityState === 'visible') {
           //     if (localStorage.getItem('registrationStatus') === 'verified') {
-          //         window.location.href = "http://localhost:3000/login";
+          //         window.location.href = "/login";
           //     }
           // }
           //Ramya's code lines for email verification ends here

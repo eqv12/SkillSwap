@@ -1,8 +1,9 @@
 import { connect } from "mongoose";
 
-const dbURI =
-  "mongodb+srv://ramya:Wimmss123.@dev-skill-swap-cluster.efbjn.mongodb.net/skillSwap?retryWrites=true&w=majority&appName=dev-skill-swap-cluster";
+// const dbURI =
+//   "mongodb+srv://ramya:Wimmss123.@dev-skill-swap-cluster.efbjn.mongodb.net/skillSwap?retryWrites=true&w=majority&appName=dev-skill-swap-cluster";
 
+const dbURI = process.env.DB_CONNECTION_STRING
 // Function to establish the database connection
 const connectDB = async () => {
   try {
