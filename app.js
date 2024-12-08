@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 import express, { json, urlencoded } from "express";
 import { connect } from "mongoose";
 import { User } from "./models/User.js";
@@ -56,7 +56,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "/auth/callback",
+      callbackURL: "https://skillswap-hh05.onrender.com/auth/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -89,7 +89,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "/auth/password-reset-callback",
+      callbackURL: "https://skillswap-hh05.onrender.com/auth/password-reset-callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -117,7 +117,7 @@ passport.use(
 
 //these are the middlewares.
 const generateToken = (rollno, expiresIn = "15m") => {
-  return jwt.sign({ rollno, purpose: "access"}, process.env.JWT_SECRET, { expiresIn });
+  return jwt.sign({ rollno, purpose: "access" }, process.env.JWT_SECRET, { expiresIn });
 };
 //token authentication middleware
 const authenticate = (req, res, next) => {
@@ -166,9 +166,7 @@ const authenticateRegistration = (req, res, next) => {
   const token = req.cookies.authToken;
   // console.log("this is the cookie that the authenticateRegistration receives.", token);
   if (!token) {
-    return res.redirect(
-      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
-    );
+    return res.redirect("/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again.");
   }
 
   try {
@@ -176,16 +174,12 @@ const authenticateRegistration = (req, res, next) => {
     console.log("this is from authenticateRegistration");
     console.log(decoded);
     if (decoded.purpose !== "signup") {
-      return res.redirect(
-        "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
-      );
+      return res.redirect("/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again.");
     }
     req.user = decoded;
     next();
   } catch (err) {
-    return res.redirect(
-      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
-    );
+    return res.redirect("/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again.");
   }
 };
 
@@ -193,9 +187,7 @@ const authenticatePassReset = (req, res, next) => {
   const token = req.cookies.authToken;
   // console.log("this is the cookie that the authenticateRegistration receives.", token);
   if (!token) {
-    return res.redirect(
-      "/login?message=Password+reset+failed+due+to+missing+or+invalid+token.+Please+try+again."
-    );
+    return res.redirect("/login?message=Password+reset+failed+due+to+missing+or+invalid+token.+Please+try+again.");
   }
 
   try {
@@ -203,16 +195,12 @@ const authenticatePassReset = (req, res, next) => {
     console.log("this is from authenticate password reset");
     console.log(decoded);
     if (decoded.purpose !== "password_reset") {
-      return res.redirect(
-        "/login?message=Password+change+failed+due+to+wrong+purpose+of+token.+Please+try+again."
-      );
+      return res.redirect("/login?message=Password+change+failed+due+to+wrong+purpose+of+token.+Please+try+again.");
     }
     req.user = decoded;
     next();
   } catch (err) {
-    return res.redirect(
-      "/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again."
-    );
+    return res.redirect("/login?message=Registration+failed+due+to+missing+or+invalid+token.+Please+try+again.");
   }
 };
 
@@ -254,7 +242,7 @@ app.post("/adminDashboard", authenticate, async (req, res) => {
   try {
     const nextId = await getNextSequence("skills");
     console.log(nextId);
-    const newSubject = new Skill({  _id: nextId, skill: subject });
+    const newSubject = new Skill({ _id: nextId, skill: subject });
     await newSubject.save();
     res.status(201).json({ message: "Skill created successfully", status: 201 });
   } catch (error) {
@@ -266,7 +254,6 @@ app.post("/adminDashboard", authenticate, async (req, res) => {
     res.status(500).json({ message: "Error creating skill", status: 500 });
   }
 });
-
 
 app.get("/password_reset", authenticatePassReset, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "password_reset.html"));
@@ -521,31 +508,31 @@ app.get("/verify-email", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-      console.log(req.body);
-      const { rollno, password, remember_me } = req.body;
-      const isAdmin = rollno === "admin"; 
-      try {
-        const user = await User.findOne({ rollno: rollno });
+  console.log(req.body);
+  const { rollno, password, remember_me } = req.body;
+  const isAdmin = rollno === "admin";
+  try {
+    const user = await User.findOne({ rollno: rollno });
 
-        if (user && (await bcrypt.compare(password, user.password))) {
-          const tokenExpiry = remember_me ? "7d" : "15m";
-          const token = generateToken(rollno, tokenExpiry);
-          console.log("This is to check the cookie", token); //vulnerabiity do not keep this in the final code if kept ramya's responsibility.
-          res.cookie("authToken", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "Strict",
-            maxAge: remember_me ? 7 * 24 * 60 * 60 * 1000 : null,
-          });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const tokenExpiry = remember_me ? "7d" : "15m";
+      const token = generateToken(rollno, tokenExpiry);
+      console.log("This is to check the cookie", token); //vulnerabiity do not keep this in the final code if kept ramya's responsibility.
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: remember_me ? 7 * 24 * 60 * 60 * 1000 : null,
+      });
 
-          res.status(200).json({ message: "User credentials authenticated", status: 200, isAdmin: isAdmin });
-        } else {
-          res.status(401).json({ message: "Bad credentials", status: 401 });
-        }
-      } catch (error) {
-        console.error("Error during login: ", error);
-        res.status(500).send("Error logging in");
-      }
+      res.status(200).json({ message: "User credentials authenticated", status: 200, isAdmin: isAdmin });
+    } else {
+      res.status(401).json({ message: "Bad credentials", status: 401 });
+    }
+  } catch (error) {
+    console.error("Error during login: ", error);
+    res.status(500).send("Error logging in");
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -684,7 +671,7 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           status: "$req.status",
           requestId: "$req._id",
           phoneVisible: "$req.phoneVisible",
-          tutorId: "$req.tutorId"
+          tutorId: "$req.tutorId",
         },
       },
       {
@@ -715,17 +702,17 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
       },
       {
         $lookup: {
-           		from: "users",
-              localField: "tutorId",
-              foreignField: "rollno",
-              as: "tutorDetails",
-        }
+          from: "users",
+          localField: "tutorId",
+          foreignField: "rollno",
+          as: "tutorDetails",
+        },
       },
       {
         $unwind: {
           path: "$tutorDetails",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $addFields: {
@@ -734,17 +721,17 @@ app.get("/api/outgoingRequests", authenticate, async (req, res) => {
           tutorPhone: {
             $cond: {
               if: {
-                $and: [{ $eq: [ "$tutorDetails.phoneVisible", true ] }, { $eq: [ "$status", "Accepted" ] }] 
-                },
+                $and: [{ $eq: ["$tutorDetails.phoneVisible", true] }, { $eq: ["$status", "Accepted"] }],
+              },
               then: "$tutorDetails.phone",
-              else: null
-        		}
-      		}
-        }
+              else: null,
+            },
+          },
+        },
       },
       {
-        $unset: 'tutorDetails'
-      }
+        $unset: "tutorDetails",
+      },
     ]);
     res.json(myReqs);
     // res.render('outgoingRequests', {
@@ -851,16 +838,14 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       },
       {
         $match: {
-          $and: [{status: requestStatus}, 
-          {
-        	$expr: {
           $and: [
-            { $isArray: "$rejectedBy" },
-            { $not: { $in: ["$rollno", "$rejectedBy"] } }
-              ]
-            }
-          }
-        ]
+            { status: requestStatus },
+            {
+              $expr: {
+                $and: [{ $isArray: "$rejectedBy" }, { $not: { $in: ["$rollno", "$rejectedBy"] } }],
+              },
+            },
+          ],
         },
       },
       {
@@ -870,9 +855,9 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
       {
         $match: {
           $expr: {
-            $ne: ["$rollno", "$senderId"]
-        	}
-        }
+            $ne: ["$rollno", "$senderId"],
+          },
+        },
       },
 
       {
@@ -969,8 +954,6 @@ app.post("/api/request/reject", authenticate, async (req, res) => {
     res.status(500).send({ error: "Internal Sever Error" });
   }
 });
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
