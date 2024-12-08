@@ -60,31 +60,66 @@
           // <label><strong>Request Date:</strong> ${reqTime}</label><br>
           const inRequestslist = document.getElementById("inReq-list");
           inRequestslist.innerHTML = "";
-
           if (inRequestsData.length === 0) {
             inRequestslist.innerHTML = "<p>No Incoming Requests available. </p>";
           } else {
             inRequestsData.forEach((request) => {
               const inReqdiv = document.createElement("div");
-              inReqdiv.classList.add("individual-request-container");
+              inReqdiv.classList.add("individual-request-container1");
               inReqdiv.setAttribute("data-subject", request.skillName);
+              // console.log(request.status);
+              inReqdiv.innerHTML = `<div class="REQ-reqest-button">
+        <div id="requests-list" class="individual-request-container">
+          <div class="REQ-title-skill">
+            <div class="REQ-skill">${request.skillName}</div>
+            <div class="REQ-date">${request.timestamp}</div>
+          </div>
+          <div class="REQ-title">${request.title}</div>
+          <div class="REQ-desc">${request.descr}</div>
+          <!-- <div>Status: pending</div> -->
+          <div class="REQ-rollno-phone">
+            <div class="REQ-rollno">${request.senderId}</div>
+            ${
+              request.status == "Accepted"
+                ? request.senderPhone
+                  ? `<div class="dispPh REQ-phone">${request.senderPhone}</div>`
+                  : `<div class="dispPh REQ-phone">${request.senderId ? request.senderId.toLowerCase() : ""}@psgtech.ac.in</div>`
+                : ""
+            }
+          </div>
+        </div>
+        <div class="REQ-buttons">
+          <button class="acceptBtn tutor-btns REQ-but-accept" onclick="acceptRequest('${
+            request.reqId
+          }', this,this.parentNode.parentNode.parentNode)">
+            &#10004;
+          </button>
+          <button class="rejectBtn tutor-btns REQ-but-reject" onclick="rejectRequest('${
+            request.reqId
+          }', this,this.parentNode.parentNode.parentNode)">
+            &#10006;
+          </button>
+        </div>
+      </div>`;
+              // inReqdiv.innerHTML = `<label><strong>skillName:</strong> ${request.skillName}</label><br>
+              // <label><strong>SenderId:</strong> ${request.senderId}</label><br>
+              // <label><strong>Title:</strong> ${request.title}</label><br>
+              // <label><strong>Description:</strong> ${request.descr}</label><br>
+              // <label><strong>Status:</strong> ${request.status}</label><br>
+              // <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
+              // ${
+              //   request.senderPhone
+              //     ? `<label class="dispPh"><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>`
+              //     : ""
+              // }
+              // <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
 
-              inReqdiv.innerHTML = `<label><strong>SkillId:</strong> ${request.skillId}</label><br>
-              <label><strong>skillName:</strong> ${request.skillName}</label><br>
-              <label><strong>SenderId:</strong> ${request.senderId}</label><br>
-              <label><strong>Title:</strong> ${request.title}</label><br>
-              <label><strong>Description:</strong> ${request.descr}</label><br>
-              <label><strong>Status:</strong> ${request.status}</label><br>
-              <label><strong>Sender Name:</strong> ${request.senderName}</label><br>
-              ${request.senderPhone ? `<label class="dispPh"><strong>Sender Ph.No:</strong> ${request.senderPhone}</label><br>` : ""}
-              <label><strong>Request Date:</strong> ${request.timestamp}</label><br><br>
-               
-              <button class="acceptBtn tutor-btns" onclick="acceptRequest('${
-                request.reqId
-              }', this, this.parentNode)">Accept</button>
-              <button class="rejectBtn tutor-btns" onclick="rejectRequest('${
-                request.reqId
-              }', this,this.parentNode)">Reject</button>`;
+              // <button class="acceptBtn tutor-btns " onclick="acceptRequest('${
+              //   request.reqId
+              // }', this, this.parentNode)">Accept</button>
+              // <button class="rejectBtn tutor-btns" onclick="rejectRequest('${
+              //   request.reqId
+              // }', this,this.parentNode)">Reject</button>`;
 
               console.log(request.descr, request.status);
               if (request.status == "Accepted") {
@@ -97,10 +132,7 @@
               // }
 
               inRequestslist.appendChild(inReqdiv);
-            }
-
-            
-          );
+            });
           }
         } catch (error) {
           console.error("Error in fetching requests: ", error);
@@ -112,6 +144,7 @@
       window.onload = fetchIncomingRequests;
 
       async function acceptRequest(reqId, button, div) {
+        console.log(div);
         try {
           const response = await fetch(`/api/request/${reqId}/accept`, {
             method: "POST",
@@ -119,7 +152,9 @@
           });
 
           if (response.ok) {
-            div.classList.add("slide-out1");
+            // div.classList.add("slide-out1");
+            div.children[0].classList.add("slide-out1");
+            div.children[0].children[0].classList.add("slide-out1");
             div.addEventListener("animationend", () => {
               div.remove();
             });
@@ -154,7 +189,7 @@
 
       function filterBySubject(selectedSubj) {
         const inRequestslist = document.getElementById("inReq-list");
-        const allRequests = inRequestslist.getElementsByClassName("individual-request-container");
+        const allRequests = inRequestslist.getElementsByClassName("individual-request-container1");
 
         Array.from(allRequests).forEach((reqDiv) => {
           const reqSubj = reqDiv.getAttribute("data-subject");
@@ -172,7 +207,7 @@
       });
 
       document.getElementById("showAccepted").addEventListener("click", function () {
-        document.getElementById("showAccepted").style.backgroundColor = "green";
+        document.getElementById("showAccepted").style.backgroundColor = "#8f05b8";
         document.getElementById("showPending").style.backgroundColor = "#d087e4";
         status = "Accepted";
         fetchIncomingRequests();
@@ -180,7 +215,7 @@
 
       document.getElementById("showPending").addEventListener("click", function () {
         document.getElementById("showAccepted").style.backgroundColor = "#d087e4";
-        document.getElementById("showPending").style.backgroundColor = "green";
+        document.getElementById("showPending").style.backgroundColor = "#8f05b8";
         status = "Pending";
         fetchIncomingRequests();
       });
@@ -195,7 +230,9 @@
           });
           console.log(response);
           if (response.ok) {
-            div.classList.add("slide-out2");
+            // div.classList.add("slide-out2");
+            div.children[0].classList.add("slide-out2");
+            div.children[0].children[0].classList.add("slide-out2");
             div.addEventListener("animationend", () => {
               div.remove();
             });

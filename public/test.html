@@ -1,39 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkillSwap - Outgoing Requests</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div class="navbar">
-    <header>
-      <span class="logo">SkillSwap</span>
-      <nav class="navList">
-        <a href="#requests" class="register-link">Requests</a>
-        <a href="#tutoring" class="register-link">Tutoring</a>
-        <a href="#post" class="register-link">Post</a>
-        <a href="#dashboard" class="register-link">Dashboard</a>
-      </nav>
-      <div class="right">
-        <img src="./resources/user.svg" alt="Profile Icon" />
-      </div>
-    </header>
-  </div>
-
-  <!-- Section for displaying requests -->
-  <div class="request-container">
-    <h2>Outgoing Requests</h2>
-    <div id="requests-list" class="individual-request-container">
-        <label>Topic: </label><br>
-        <label>Description: </label><br>
-        <label>Status: </label>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillSwap - Outgoing Requests</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="navbar">
+      <header>
+        <span class="logo">SkillSwap</span>
+        <nav class="navList">
+          <a href="#requests" class="register-link">Requests</a>
+          <a href="#tutoring" class="register-link">Tutoring</a>
+          <a href="#post" class="register-link">Post</a>
+          <a href="#dashboard" class="register-link">Dashboard</a>
+        </nav>
+        <div class="right">
+          <img src="./resources/user.svg" alt="Profile Icon" />
+        </div>
+      </header>
     </div>
-  </div>
 
-  <script>
-    // Fetch the list of outgoing requests from the server
-  </script>
-</body>
+    <!-- Section for displaying requests -->
+    <div class="request-container">
+      <h2>Incoming Requests</h2>
+      <div class="REQ-reqest-button">
+        <div id="requests-list" class="individual-request-container">
+          <div class="REQ-title-skill">
+            <div class="REQ-skill">${request.skillName}</div>
+            <div class="REQ-date">${request.timestamp}</div>
+          </div>
+          <div class="REQ-title">${request.title}</div>
+          <div class="REQ-desc">${request.descr}</div>
+          <!-- <div>Status: pending</div> -->
+          <div class="REQ-rollno-phone">
+            <div class="REQ-rollno">${request.senderId}</div>
+            ${request.senderPhone?`
+            <div class="dispPh REQ-phone">${request.senderPhone}</div>
+            `:"" }
+          </div>
+        </div>
+        <div class="REQ-buttons">
+          <button class="acceptBtn tutor-btns REQ-but-accept" onclick="acceptRequest('${request.reqId}', this,this.parentNode)">
+            &#10004;
+          </button>
+          <button class="rejectBtn tutor-btns REQ-but-reject" onclick="rejectRequest('${request.reqId}', this,this.parentNode)">
+            &#10006;
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <!-- <button class="acceptBtn tutor-btns REQ-but-accept">&#10004</button>
+          <button class="rejectBtn tutor-btns REQ-but-reject">&#10006</button> -->
+    </div>
+    <script>
+      // Fetch the list of outgoing requests from the server
+    </script>
+  </body>
 </html>
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates est facilis tempora nemo asperiores aliquid nobis impedit
+vitae tenetur, minus mollitia molestiae inventore assumenda ad ducimus neque reprehenderit ullam unde earum maxime, enim
+laudantium! Consequatur nisi aliquid dolorem, doloremque neque quaerat necessitatibus, voluptatibus earum dicta laboriosam,
+consectetur ad officia quae commodi at nobis amet iure animi sit nostrum? Aut neque ex amet corrupti veniam. Distinctio vitae
+quaerat laboriosam similique commodi, neque libero pariatur itaque necessitatibus laudantium! Sapiente itaque exercitationem
+voluptates voluptas, at error voluptatibus dignissimos, facilis harum nesciunt tempora, neque fuga sequi quibusdam debitis? Quod
+adipisci atque soluta? Ut, similique?

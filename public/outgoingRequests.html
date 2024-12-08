@@ -21,11 +21,6 @@
         </div>
       </header>
     </div>
-
-    <!-- <div id="reqs-list" class="request-container">
-      <h2>Outgoing Requests</h2>
-    </div> -->
-
     <div id="req-wrapper" class="request-container">
       <h2>Outgoing Requests</h2>
       <div id="toggleContainer">
@@ -77,17 +72,49 @@
               console.log(request);
               // document.getElementById("topicLabel").innerHTML += request.subjName
               const reqDiv = document.createElement("div");
-              reqDiv.classList.add("individual-request-container");
+              reqDiv.classList.add("individual-request-container1");
 
               reqDiv.setAttribute("data-subject", request.subjName);
-              reqDiv.innerHTML = `<label><strong>Topic:</strong> ${request.subjName}</label><br>
-             <label><strong>Title:</strong> ${request.title}</label><br>
-             <label><strong>Description:</strong> ${request.descr}</label><br>
-             <label><strong>Status:</strong> ${request.status}</label><br>
-             ${request.tutorName ? `<label class="dispPh"><strong>Accepted By:</strong> ${request.tutorName}</label><br>` : ""}
-             ${request.tutorPhone ? `<label class="dispPh"><strong>Tutor Phone No.:</strong> ${request.tutorPhone}</label><br>` : ""}
-             <button class="delete-btn"
-             data-request-id="${request.requestId}">Delete</button>`;
+              reqDiv.innerHTML = `<div class="REQ-reqest-button">
+                      <div id="requests-list" class="individual-request-container">
+                      <div class="REQ-title-skill">
+                      <div class="REQ-skill">${request.subjName}</div>
+                      <div class="REQ-date">${request.status}</div>
+                      </div>
+                  <div class="REQ-title">${request.title}</div>
+                  <div class="REQ-desc">${request.descr}</div>
+                  <!-- <div>Status: pending</div> -->
+                  <div class="REQ-rollno-phone">
+                    ${request.tutorName ? `<div class="REQ-rollno">${request.tutorName}</div>` : ""}
+                    ${
+                      request.tutorName
+                        ? request.tutorPhone
+                          ? `<div class="dispPh REQ-phone">${request.tutorPhone}</div>`
+                          : `<div class="dispPh REQ-phone">${request.tutorId.toLowerCase()}@psgtech.ac.in</div>`
+                        : ""
+                    }
+                  </div>
+                </div>
+                <div class="REQ-buttons-out">
+                   <button class="REQ-but-delete"
+                    data-request-id="${request.requestId}"><img class="delete-icon-out" data-request-id="${
+                request.requestId
+              }" src="./resources/bin2.svg" alt="delete Icon" /></button>
+                </div>
+              </div>`;
+
+              // reqDiv.innerHTML = `<label><strong>Topic:</strong> ${request.subjName}</label><br>
+              //  <label><strong>Title:</strong> ${request.title}</label><br>
+              //  <label><strong>Description:</strong> ${request.descr}</label><br>
+              //  <label><strong>Status:</strong> ${request.status}</label><br>
+              //  ${request.tutorName ? `<label class="dispPh"><strong>Accepted By:</strong> ${request.tutorName}</label><br>` : ""}
+              //  ${
+              //    request.tutorPhone
+              //      ? `<label class="dispPh"><strong>Tutor Phone No.:</strong> ${request.tutorPhone}</label><br>`
+              //      : ""
+              //  }
+              //  <button class="delete-btn"
+              //  data-request-id="${request.requestId}">Delete</button>`;
 
               // Append to the list
               requestsList.appendChild(reqDiv);
@@ -103,7 +130,7 @@
       // Run the function when the page loads
       window.onload = fetchOutgoingRequests;
       document.getElementById("reqs-list").addEventListener("click", async (e) => {
-        if (e.target.classList.contains("delete-btn")) {
+        if (e.target.classList.contains("REQ-but-delete") || e.target.classList.contains("delete-icon-out")) {
           const requestId = e.target.dataset.requestId;
           console.log(requestId);
           if (!requestId) {
@@ -121,7 +148,9 @@
             if (response.ok && data.status === 200) {
               // alert("Request deleted successfully");
               // Remove the request from the DOM
-              const container = e.target.closest(".individual-request-container");
+              const container = e.target.closest(".individual-request-container1");
+              const container1 = e.target.closest(".REQ-reqest-button");
+              container1.classList.add("delete-slide");
               container.classList.add("delete-slide");
               // Wait for 2 seconds (matching the animation duration)
               setTimeout(() => {
@@ -154,7 +183,7 @@
 
       function filterBySubject(selectedSubj) {
         const outRequestslist = document.getElementById("reqs-list");
-        const allRequests = outRequestslist.getElementsByClassName("individual-request-container");
+        const allRequests = outRequestslist.getElementsByClassName("individual-request-container1");
         console.log("$$$$", allRequests);
 
         Array.from(allRequests).forEach((reqDiv) => {
@@ -173,7 +202,7 @@
       });
 
       document.getElementById("showAccepted").addEventListener("click", function () {
-        document.getElementById("showAccepted").style.backgroundColor = "green";
+        document.getElementById("showAccepted").style.backgroundColor = "#8f05b8";
         document.getElementById("showPending").style.backgroundColor = "#d087e4";
         status = "Accepted";
         fetchOutgoingRequests();
@@ -181,7 +210,7 @@
 
       document.getElementById("showPending").addEventListener("click", function () {
         document.getElementById("showAccepted").style.backgroundColor = "#d087e4";
-        document.getElementById("showPending").style.backgroundColor = "green";
+        document.getElementById("showPending").style.backgroundColor = "#8f05b8";
         status = "Pending";
         fetchOutgoingRequests();
       });

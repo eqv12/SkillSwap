@@ -109,7 +109,7 @@
           left: 6vw;
           top: 20vh;
           font-size: 40vh;
-          color: black;
+          /* color: black; */
           z-index: 0;
         }
         100% {
@@ -117,13 +117,28 @@
           left: -39.5vw;
           top: -15vh;
           font-size: 24px;
-          color: white;
+          /* color: white; */
           z-index: 1001;
+        }
+      }
+      @keyframes dispSkillShare2 {
+        0% {
+          color: black;
+        }
+        60% {
+          color: black;
+        }
+        75% {
+          color: white;
+        }
+        100% {
+          color: white;
         }
       }
 
       [class*="dispSkillShare"] {
-        animation: dispSkillShare1 1s ease-out;
+        animation: dispSkillShare1 1s cubic-bezier(0.77, 0.37, 0.33, 1.22),
+          dispSkillShare2 1s cubic-bezier(0.77, 0.37, 0.33, 1.22);
       }
 
       @-webkit-keyframes flip-horizontal-bottom1 {
@@ -167,12 +182,14 @@
         }
       }
       [class$="odd"] {
-        -webkit-animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
-        animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+        -webkit-animation: flip-horizontal-bottom1 0.8s cubic-bezier(0.96, 0, 0.04, 1) both;
+        animation: flip-horizontal-bottom1 0.8s cubic-bezier(0.96, 0, 0.04, 1) both;
+        /* -webkit-animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+        animation: flip-horizontal-bottom1 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both; */
       }
       [class$="even"] {
-        -webkit-animation: flip-horizontal-bottom2 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
-        animation: flip-horizontal-bottom2 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) both;
+        -webkit-animation: flip-horizontal-bottom2 0.8s cubic-bezier(0.96, 0, 0.04, 1) both;
+        animation: flip-horizontal-bottom2 0.8s cubic-bezier(0.96, 0, 0.04, 1) both;
       }
     </style>
   </head>
@@ -187,7 +204,7 @@
     </div>
     <div class="flip-container">
       <div class="flipping-element">
-        <img src="./resources/book.svg" alt="Profile Icon" />
+        <img src="./resources/cv.svg" alt="Profile Icon" />
       </div>
     </div>
 
@@ -199,18 +216,18 @@
 
         // Array of icons to cycle through
         const icons = [
+          "cv.svg",
+          "plane.svg",
+          "date.svg",
           "book.svg",
           "computer.svg",
+          // "pen.svg",
+          // "folder.svg",
+          // "highlight.svg",
           "rank.svg",
-          "plane.svg",
-          "cv.svg",
-          "chat.svg",
-          "folder.svg",
-          "goal.svg",
-          "list.svg",
-          "highlight.svg",
-          "date.svg",
-          "pen.svg",
+          // "goal.svg",
+          // "list.svg",
+          // "chat.svg",
         ];
         let currentIndex = 0; // Tracks the current icon index
         let flipCounter = 1; // Counter for unique class name
@@ -226,16 +243,16 @@
           flipContainer.classList.add(newClass);
           setTimeout(() => {
             currentIndex = (currentIndex + 1) % icons.length;
-            if (flipCounter < 13) {
+            if (flipCounter < 7) {
               flipContainer.innerHTML = `<img src="./resources/${icons[currentIndex]}" alt="Icon">`;
-            } else if (flipCounter == 13) {
+            } else if (flipCounter == 7) {
               flipContainer.innerHTML = `<p>SkillSwap</p>`;
             }
-          }, 200);
-          if (flipCounter == 13) {
+          }, 400);
+          if (flipCounter == 7) {
             clearInterval(flipInterval);
           }
-        }, 400);
+        }, 800);
         // Add the class after the flipping animation is fully completed
         // Add the class after the flipping animation is fully completed
         // Add the class after the flipping animation is fully completed
@@ -258,10 +275,10 @@
             },
             { once: true }
           ); // Ensures the listener runs only once
-        }, 400 * 14); // Delay = interval time (500ms) * number of flips (12)
+        }, 800 * 7); // Delay = interval time (500ms) * number of flips (12)
         setTimeout(() => {
           window.location.href = "/login";
-        }, 400 * 14 + 1200);
+        }, 800 * 7 + 1200);
       };
     </script>
   </body>
