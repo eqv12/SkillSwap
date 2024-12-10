@@ -262,7 +262,6 @@ app.get("/password_reset", authenticatePassReset, (req, res) => {
 app.get("/register-data", authenticateRegistration, (req, res) => {
   console.log(req.user);
   const email = req.user.email;
-  console.log("this is to check if name is working in register-data get route", name);
   const name = req.user.name;
   console.log("this is to check if name is working in register-data get route", name);
   const rollno = email.split("@")[0].toUpperCase();

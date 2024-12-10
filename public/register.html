@@ -21,8 +21,9 @@
         <input type="text" placeholder="phone" id="phone" name="phone" class="input-field" />
         <input type="password" placeholder="password" id="password" name="password" class="input-field" />
         <input type="password" placeholder="confirm password" id="re_password" name="re_password" class="input-field" />
-        <p id="pass_valid"></p>
-        <div class="error-box" id="error-box"><span id="error1">User Not registered</span></div>
+        <div class="error-box" id="error-box">
+          <span id="error1">User Not registered</span>
+        </div>
         <button class="login-button" id="submit" type="button">
           <span id="arrow"><strong>→</strong></span>
         </button>
@@ -43,40 +44,93 @@
         }
       };
       function passwordChecking(password) {
-        const pass_valid = document.getElementById("pass_valid");
-        pass_valid.textContent = "";
+        const error1 = document.getElementById("error1");
+        error1.textContent = "";
         const minlength = password.length >= 8;
         const uppercase = /[A-Z]/.test(password);
         const lowercase = /[a-z]/.test(password);
         const digit = /[0-9]/.test(password);
         const specialchar = /[!@#$%^&*(),.?;:|<>]/.test(password);
         if (!minlength) {
-          pass_valid.textContent = "Password must be atleast 8 characters.";
-          pass_valid.style.color = "red";
-          return;
+          error1.textContent = "Password must be atleast 8 characters.";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
+          return false;
         }
         if (!uppercase) {
-          pass_valid.textContent = "Password must be atleast one uppercase.";
-          pass_valid.style.color = "red";
-          return;
+          error1.textContent = "Password must be atleast one uppercase.";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
+          return false;
         }
         if (!lowercase) {
-          pass_valid.textContent = "Password must be atleast one lowercase.";
-          pass_valid.style.color = "red";
-          return;
+          error1.textContent = "Password must be atleast one lowercase.";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
+          return false;
         }
         if (!specialchar) {
-          pass_valid.textContent = "Password must be atleast one special character.";
-          pass_valid.style.color = "red";
-          return;
+          error1.textContent = "Password must include a special character.";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
+          return false;
         }
         if (!digit) {
-          pass_valid.textContent = "Password must be atleast one digit.";
-          pass_valid.style.color = "red";
-          return;
+          error1.textContent = "Password must be atleast one digit.";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
+          return false;
         }
-        pass_valid.textContent = "Password is Strong.";
-        pass_valid.style.color = "green";
+        error1.textContent = "Password is Strong.";
+        error1.style.color = "green";
+        document.getElementById("error-box").style.opacity = "1";
+      }
+      function validateForm() {
+        // Get values from the form fields
+        var phone = document.getElementById("phone").value.trim();
+        var password = document.getElementById("password").value.trim();
+        var email = document.getElementById("email").value.trim();
+        var name = document.getElementById("name").value.trim();
+        var username = document.getElementById("username").value.trim();
+        var rePassword = document.getElementById("re_password").value.trim();
+
+        // Reset error messages and hide the error box initially
+        document.getElementById("error-box").style.opacity = "0";
+        document.getElementById("error1").textContent = "";
+        document.getElementById("error1").style.color = "black";
+
+        var phoneRegex = /^\d{10}$/; // Regex for exactly 10 digits
+        if (!phoneRegex.test(phone)) {
+          document.getElementById("error1").textContent = "Please enter a valid 10-digit phone number.";
+          document.getElementById("error1").style.color = "red"; // Change text color to red
+          document.getElementById("error-box").style.opacity = "1"; // Make the error box visible
+          return false; // Validation failed if phone is not 10 digits
+        }
+
+        // Check if phone, password, or repeat password is empty
+        if (phone === "" || password === "" || rePassword === "" || email === "" || name === "" || username === "") {
+          document.getElementById("error1").textContent = "Please fill in all required fields.";
+          document.getElementById("error1").style.color = "red"; // Change text color to red
+          document.getElementById("error-box").style.opacity = "1"; // Make the error box visible
+          return false; // Validation failed if any field is empty
+        }
+
+        // Validate phone number: 10 digits only
+
+        // Check if password and confirm password match
+        // if (password !== rePassword) {
+        //   document.getElementById("error1").textContent =
+        //     "Passwords do not match.";
+        //   document.getElementById("error1").style.color = "red"; // Change text color to red
+        //   document.getElementById("error-box").style.opacity = "1"; // Make the error box visible
+        //   return false; // Validation failed if passwords don't match
+        // }
+
+        // If all checks pass, form can be submitted
+        if (passwordChecking(password) == false) {
+          return false;
+        }
+        return true;
       }
       document.getElementById("password").addEventListener("input", function () {
         const password = document.getElementById("password").value;
@@ -90,12 +144,14 @@
         const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
         const re_password = document.getElementById("re_password").value;
-
-        passwordChecking(password);
+        if (validateForm() == false) {
+          return;
+        }
 
         if (password !== re_password) {
-          pass_valid.textContent = "Passwords do not match!";
-          pass_valid.style.color = "red";
+          error1.textContent = "Passwords do not match!";
+          error1.style.color = "red";
+          document.getElementById("error-box").style.opacity = "1";
           return; // Stop further execution if passwords don't match
         }
 
@@ -104,7 +160,11 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ rollno: username, name: name, password: password }),
+          body: JSON.stringify({
+            rollno: username,
+            name: name,
+            password: password,
+          }),
         });
 
         const data = await response.json();
@@ -115,6 +175,7 @@
           window.location.href = "/login?message=Registration+successful.+Login+to+use+the+app";
         } else if (data.status == 500) {
           //alert("Wrong credentials");
+          document.getElementById("error1").innerText = "User Not Registered. Please Try again";
           document.getElementById("error-box").style.opacity = "1";
         }
 
