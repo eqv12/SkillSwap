@@ -17,7 +17,9 @@
         background-color: #d3bdf0;
         align-items: center;
         justify-content: center;
-        height: 97.6vh;
+        height: 90vh;
+        width: 90vw;
+        /* margin: auto; */
       }
 
       .flipping-element {
@@ -30,8 +32,7 @@
         align-items: center;
         width: 90vw;
         height: 38vh;
-        overflow: hidden;
-        font-size: 40vh;
+        font-size: 20vw;
         font-family: "Jersey 25", sans-serif;
       }
       .flipping-element img {
@@ -111,15 +112,15 @@
 
       @keyframes dispSkillShare1 {
         0% {
-          position: absolute;
+          position: fixed;
           left: 6vw;
           top: 20vh;
-          font-size: 40vh;
+          font-size: 20vw;
           /* color: black; */
           z-index: 0;
         }
         100% {
-          position: absolute;
+          position: fixed;
           left: -39.5vw;
           top: -15vh;
           font-size: 24px;
@@ -270,7 +271,7 @@
           flipContainer.addEventListener(
             "animationend",
             () => {
-              flipContainer.style.position = "absolute"; // Set the element's position relative to its normal position
+              flipContainer.style.position = "fixed"; // Set the element's position relative to its normal position
               flipContainer.style.fontSize = "24px"; // Set the font size to 24px
               flipContainer.style.left = "-39.5vw"; // Move the element 10% of the viewport width to the left
               flipContainer.style.top = "-15vh"; // Move the element 50% of the viewport height upwards

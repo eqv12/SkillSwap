@@ -15,10 +15,10 @@
           <a href="/incomingRequests" class="register-link">Tutoring</a>
           <a href="/newRequest" class="register-link">Post</a>
           <a href="/dashboard" class="register-link">Dashboard</a>
+          <div class="right" onclick="logout()">
+            <img src="./resources/logouticon.svg" alt="logout Icon" />
+          </div>
         </nav>
-        <div class="right" onclick="logout()">
-          <img src="./resources/logouticon.svg" alt="logout Icon" />
-        </div>
       </header>
     </div>
     <div class="bigcont">
@@ -43,7 +43,7 @@
           <p id="email"></p>
           <p id="phone"></p>
           <div style="display: flex; flex-direction: row">
-            <p><pre style="font-family: inherit;" >Display Phone:   </pre></p>
+            <pre style="font-family: inherit">Display Phone:   </pre>
             <label class="switch">
               <input type="checkbox" id="phoneDisplayCheck" />
               <span class="slider round"></span>
@@ -53,7 +53,7 @@
       </div>
     </div>
     <script>
-      document.getElementById("phoneDisplayCheck").addEventListener("change", async function(event){
+      document.getElementById("phoneDisplayCheck").addEventListener("change", async function (event) {
         const phoneCheck = document.getElementById("phoneDisplayCheck");
         console.log(phoneCheck.checked);
         const response = await fetch("/displayPhone", {
@@ -61,23 +61,22 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({display : phoneCheck.checked}),
+          body: JSON.stringify({ display: phoneCheck.checked }),
         });
 
         const data = await response.json();
         console.log(data);
         if (data.status == 200) {
-          document.getElementById("phoneDisplayCheck").checked=true;
+          document.getElementById("phoneDisplayCheck").checked = true;
           // alert("Login successful");
           // document.getElementById("error-box").style.opacity = "0";
           // window.location.href = "/outgoingRequests";
         } else if (data.status == 401) {
           // alert("Wrong credentials");
           // document.getElementById("error-box").style.opacity = "1";
-                    document.getElementById("phoneDisplayCheck").checked=false;
+          document.getElementById("phoneDisplayCheck").checked = false;
         }
-
-      })
+      });
       async function userdeets() {
         try {
           const subListJson = await fetch("/dashboard-data");
@@ -87,12 +86,12 @@
           const rollno = document.getElementById("rollno");
           const email = document.getElementById("email");
           const phone = document.getElementById("phone");
-          const display =document.getElementById("phoneDisplayCheck");
+          const display = document.getElementById("phoneDisplayCheck");
           name.textContent = userData[0].name;
           rollno.textContent = userData[0].rollno;
           phone.textContent = userData[0].phone;
           email.textContent = userData[0].rollno + "@psgtech.ac.in";
-          display.checked=userData[0].phoneVisible;
+          display.checked = userData[0].phoneVisible;
         } catch (error) {
           console.error("Error:", error);
         }

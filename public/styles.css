@@ -20,11 +20,12 @@ body {
 
 /* Sticky Header */
 header {
+  flex-direction: row;
   background-color: #2b0038;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
+  padding: 10px;
   color: white;
   position: sticky;
   top: 0;
@@ -103,7 +104,8 @@ header {
   align-items: center;
   justify-content: space-between;
 }
-.newreqButton1, .newSubjButton1 {
+.newreqButton1,
+.newSubjButton1 {
   width: 45%;
   padding: 10px;
   border: none;
@@ -112,7 +114,8 @@ header {
   font-size: 20px;
   cursor: pointer;
 }
-.newreqButton2, .newSubjButton2 {
+.newreqButton2,
+.newSubjButton2 {
   width: 45%;
   padding: 10px;
   border: none;
@@ -211,10 +214,12 @@ button[type="submit"] {
 }
 
 .navList {
-  /* display: flex; */
-  justify-content: flex-end; /* Space out items */
+  display: flex;
+  justify-items: center;
+  justify-content: space-between;
+  gap: 5vw;
   align-items: center;
-  padding-left: 38%;
+  padding-left: 3vw;
 }
 
 .navList a {
@@ -222,13 +227,15 @@ button[type="submit"] {
   text-decoration: none;
   font-size: 20px;
   padding: 10px;
-  margin-left: 60px;
+  background-color: #2b0038;
+  /* margin-left: 5vw; */
 }
 
 .navList a:hover {
-  border-radius: 5px;
+  border-radius: 15px;
   background-color: #cfcfcf;
   color: black;
+  transition: background-color 0.3s ease-out;
 }
 
 .right {
@@ -338,6 +345,9 @@ textarea {
   flex-direction: column;
   /* justify-content: center; */
   flex-wrap: wrap;
+  overflow: auto;
+  text-overflow: ellipsis;
+  text-wrap: wrap;
   align-items: center;
   align-content: center;
   gap: 30px;
@@ -400,7 +410,9 @@ textarea {
   position: relative;
   /* top: 8px; */
   /* background-color: #d087e4; */
-  display: inline-block;
+  display: flex;
+  justify-content: flex-start;
+  gap: 2vw;
   padding: 10px;
   border-radius: 10px;
   /* margin-bottom: 5px; */
@@ -410,7 +422,7 @@ textarea {
   border: none;
   border-radius: 5px;
   height: 35px;
-  width: 150px;
+  width: 20%;
   color: white;
 }
 
@@ -425,15 +437,16 @@ textarea {
 #subjectFilter {
   border: none;
   border-radius: 5px;
-  width: 180px;
+  width: 100%;
   height: 35px;
   padding: 5px;
   background-color: #e6e3e7;
 }
 
 #filterContainer {
-  margin-left: 40px;
-  display: inline;
+  /* margin-left: 40px; */
+  display: flex;
+  width: 30%;
 }
 
 @keyframes slideOut1 {
@@ -628,6 +641,8 @@ input:checked + .slider:before {
 }
 .REQ-phone,
 .REQ-rollno {
+  display: flex;
+  text-wrap: balance;
   background-color: #c8b0c7;
   width: fit-content;
   padding: 7px 7px 7px 7px;
