@@ -208,6 +208,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "flip.html"));
 });
 
+app.get("/underConstruction", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "underConstruction.html"));
+});
+
 app.get("/login", authenticateLogin, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
