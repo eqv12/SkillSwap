@@ -56,7 +56,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "https://skillswap-hh05.onrender.com/auth/callback",
+      callbackURL: "http://localhost:3000/auth/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -415,7 +415,7 @@ app.get(
 
 app.post("/register", authenticateRegistration, async (req, res) => {
   const { password, phone } = req.body;
-  console.log(password);
+  console.log(password,phone);
   const email = req.user.email;
   const rollno = email.split("@")[0].toUpperCase();
   const name = req.user.name;
@@ -825,6 +825,7 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
           title: "$matchingReq.title",
           descr: "$matchingReq.description",
           status: "$matchingReq.status",
+          tutorId: "$matchingReq.tutorId",
           rejectedBy: "$matchingReq.rejectedBy",
           phoneVisible: "$matchingReq.phoneVisible",
           timestamp: {
@@ -846,6 +847,17 @@ app.get("/api/incomingRequests", authenticate, async (req, res) => {
             },
           ],
         },
+      },
+      {
+        $match: {
+          $expr: {
+            $cond: [
+              { $eq: ["$status", "Accepted"] },  
+              { $eq: ["$tutorId", receiverId] },  
+              true                     
+            ]
+          }
+        }
       },
       {
         $unset: "matchingReq",

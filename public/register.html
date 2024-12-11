@@ -108,7 +108,13 @@
         }
 
         // Check if phone, password, or repeat password is empty
-        if (phone === "" || password === "" || rePassword === "" || email === "" || name === "" || username === "") {
+        if (email === "" || name === "" || username === "") {
+          document.getElementById("error1").textContent = "Unable to register. Please try later.";
+          document.getElementById("error1").style.color = "red"; // Change text color to red
+          document.getElementById("error-box").style.opacity = "1"; // Make the error box visible
+          return false; // Validation failed if any field is empty
+        }
+        if (phone === "" || password === "" || rePassword === "") {
           document.getElementById("error1").textContent = "Please fill in all required fields.";
           document.getElementById("error1").style.color = "red"; // Change text color to red
           document.getElementById("error-box").style.opacity = "1"; // Make the error box visible
@@ -144,6 +150,7 @@
         const name = document.getElementById("name").value;
         const password = document.getElementById("password").value;
         const re_password = document.getElementById("re_password").value;
+        const phone = document.getElementById("phone").value;
         if (validateForm() == false) {
           return;
         }
@@ -164,6 +171,7 @@
             rollno: username,
             name: name,
             password: password,
+            phone: phone,
           }),
         });
 
