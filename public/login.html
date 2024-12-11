@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillSwap Login</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script> -->
+    <script>
+      if (window.innerWidth < 800) {
+        window.location.href = "/underConstruction";
+      }
+    </script>
   </head>
   <body>
     <!-- <div class="navbar">
@@ -64,12 +69,10 @@
         if (data.status == 200) {
           if (data.isAdmin) {
             window.location.href = "/adminDashboard";
-          }
-    
-          else { 
+          } else {
             window.location.href = "/outgoingRequests";
           }
-          
+
           document.getElementById("error-box").style.opacity = "0";
         } else if (data.status == 401) {
           // alert("Wrong credentials");
@@ -93,7 +96,7 @@
       function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+        if (parts.length === 2) return parts.pop().split(";").shift();
       }
     </script>
   </body>
