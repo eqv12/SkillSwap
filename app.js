@@ -56,7 +56,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/callback",
+      callbackURL: "https://skillswap-hh05.onrender.com/auth/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
