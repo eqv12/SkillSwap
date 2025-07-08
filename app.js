@@ -424,7 +424,7 @@ app.post("/register", authenticateRegistration, async (req, res) => {
   const rollno = email.split("@")[0].toUpperCase();
   const name = req.user.name;
 
-  // // let email = `${rollno}@psgtech.ac.in`;
+  // let email = `${rollno}@psgtech.ac.in`;
   // let email = "ramyaraja1206@gmail.com";
   // const hashedPassword = await bcrypt.hash(password, 10);
 
